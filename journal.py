@@ -7,8 +7,8 @@ WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 
 def get_analysis():
-    # Wir nutzen 1.5-flash – das ist 2026 am stabilsten im Free-Tier
-    model = "gemini-1.5-flash" 
+    # Wir nutzen 2.5-flash – das ist 2026 am stabilsten im Free-Tier
+    model = "gemini-2.5-flash"
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_KEY}"
     
     prompt = (
