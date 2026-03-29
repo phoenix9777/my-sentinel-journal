@@ -1,50 +1,68 @@
 import requests
-import json
 import os
 import time
+import pandas as pd
+import pandas_ta as ta
 
-# Holt die Daten sicher aus den GitHub Secrets
 WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 
-def get_crypto_analysis(coin):
+def get_live_data(symbol):
+    # 1. Kurs & Indikatoren von Binance (4H Chart)
+    url = f"https://api.binance.com/api/v3/klines?symbol={symbol}USDT&interval=4h&limit=100"
+    data = requests.get(url).json()
+    df = pd.DataFrame(data, columns=['ts', 'o', 'h', 'l', 'c', 'v', 'cts', 'qv', 'nt', 'tbv', 'tqv', 'ignore'])
+    df['c'] = df['c'].astype(float)
+    
+    # Technische Indikatoren berechnen
+    rsi = df.ta.rsi(length=14).iloc[-1]
+    macd = df.ta.macd().iloc[-1] # Gibt MACD, Histogramm und Signal
+    current_price = df['c'].iloc[-1]
+    
+    # 2. Fear & Greed Index
+    fng_data = requests.get("https://api.alternative.me/fng/").json()
+    fng_value = fng_data['data'][0]['value']
+    fng_label = fng_data['data'][0]['value_classification']
+    
+    return {
+        "price": current_price,
+        "rsi": round(rsi, 2),
+        "macd": macd.to_dict(),
+        "fng": f"{fng_value} ({fng_label})"
+    }
+
+def get_crypto_analysis(coin, stats):
     model = "gemini-2.5-flash" 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_KEY}"
     
     prompt = (
-        f"Du bist 'Sentinel Alpha 3.0', ein High-End Krypto-Analyst. Analysiere {coin}/USDT im 4H-Chart für kingley3370.\n\n"
-        "Nutze exakt diese Struktur wie Finora AI:\n"
-        "1. Begrüßung: 'Hallo kingley3370, hier ist dein Sentinel Check für {coin}!'\n"
-        "2. Allgemeine Einschätzung: (Preis, Handelsspanne, Gleichgewichtsniveau, Trendbewertung (MACD/RSI Schwäche/Stärke)).\n"
-        "3. Technische Analyse & Smart Money Concepts: (Liquidität-Sweeps, FVG-Zonen, Orderblocks, Market Structure Shift).\n"
-        "4. Kritische Preislevel: (Präzise Widerstände und Unterstützungen).\n"
-        "5. Mögliche Trading-Setups: (Detaillierte Long/Short Setups mit Bestätigungen wie Pin-Bar/Engulfing).\n"
-        "6. Deine Erwartung: (Bias und Favorit-Szenario).\n\n"
-        "Schreibe auf Deutsch, sei extrem ausführlich und nutze Markdown (Fett, Listen) für Discord."
+        f"Hallo kingley3370, hier sind die LIVE-DATEN für {coin}:\n"
+        f"- Aktueller Preis: {stats['price']} USDT\n"
+        f"- RSI (14): {stats['rsi']}\n"
+        f"- MACD: {stats['macd']}\n"
+        f"- Markt-Sentiment (Fear & Greed): {stats['fng']}\n\n"
+        "Erstelle eine detaillierte Finora-AI-Style Analyse. Nutze Smart Money Concepts (SMC), "
+        "erkläre FVG-Zonen und Liquiditäts-Sweeps basierend auf diesen echten Werten. "
+        "Gib konkrete Setups (Long/Short) mit TP und SL an. Sei extrem professionell."
     )
     
     try:
         response = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]})
-        data = response.json()
-        return data['candidates'][0]['content']['parts'][0]['text']
+        return response.json()['candidates'][0]['content']['parts'][0]['text']
     except Exception as e:
-        return f"❌ Fehler bei der Analyse von {coin}: {str(e)}"
+        return f"❌ Fehler bei {coin}: {str(e)}"
 
 def send_to_discord():
     coins = ["BTC", "SOL", "SUI"]
-    # Link zu einem coolen Logo (Kannst du gegen jedes Bild-URL tauschen)
-    logo_url = "https://i.imgur.com/8N7j5fX.png" 
-
     for coin in coins:
-        text = get_crypto_analysis(coin)
+        stats = get_live_data(coin)
+        text = get_crypto_analysis(coin, stats)
         payload = {
             "username": f"Sentinel Alpha | {coin}",
-            "avatar_url": logo_url,
             "content": text[:2000]
         }
         requests.post(WEBHOOK, json=payload)
-        print(f"{coin} Analyse gesendet.")
-        time.sleep(10) # 10 Sekunden Pause zwischen den Coins, damit Discord nicht blockt
+        time.sleep(5)
 
 if __name__ == "__main__":
     send_to_discord()
