@@ -1,107 +1,97 @@
-import requests
 import os
 import time
-import numpy as np
+from binance.client import Client
+import requests
 from datetime import datetime
 
+# Daten aus GitHub Secrets
 WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 
 def get_current_time():
     return datetime.now().strftime("%d.%m.%Y | %H:%M")
 
-def calculate_rsi(prices, period=14):
-    if len(prices) <= period: return 50
-    deltas = np.diff(prices)
-    up = deltas[deltas > 0].sum() / period
-    down = -deltas[deltas < 0].sum() / period
-    if down == 0: return 100
-    rs = up / down
-    return 100. - 100. / (1. + rs)
-
 def get_live_data(symbol):
     try:
-        # Erhöhte Sicherheit beim Abruf
-        url = f"https://api.binance.com/api/v3/klines?symbol={symbol}USDT&interval=4h&limit=50"
-        response = requests.get(url, timeout=10)
-        data = response.json()
+        # Initialisierung ohne API-Key (reicht für Marktdaten)
+        client = Client("", "")
+        klines = client.get_klines(symbol=f"{symbol}USDT", interval=Client.KLINE_INTERVAL_4HOUR, limit=50)
         
-        # Prüfung: Haben wir wirklich eine Liste mit Daten bekommen?
-        if not isinstance(data, list) or len(data) == 0:
-            print(f"⚠️ Keine Daten von Binance für {symbol} erhalten.")
-            return None
-            
-        # Wir extrahieren die Spalten sicher
-        closes = []
-        highs = []
-        lows = []
-        
-        for candle in data:
-            closes.append(float(candle[4]))
-            highs.append(float(candle[2]))
-            lows.append(float(candle[3]))
-            
-        closes = np.array(closes)
+        closes = [float(k[4]) for k in klines]
+        highs = [float(k[2]) for k in klines]
+        lows = [float(k[3]) for k in klines]
         
         return {
-            "price": closes[-1], 
-            "rsi": round(calculate_rsi(closes), 2), 
-            "high": max(highs[-20:]), 
-            "low": min(lows[-20:])
+            "price": closes[-1],
+            "high": max(highs[-20:]),
+            "low": min(lows[-20:]),
+            "open": closes[0]
         }
     except Exception as e:
-        print(f"❌ Detail-Fehler bei {symbol}: {e}")
+        print(f"❌ Binance-Fehler ({symbol}): {e}")
         return None
 
 def get_crypto_analysis(coin, stats):
-    # WICHTIG: Wir nutzen jetzt gemini-1.5-flash als stabilen Fallback, falls 2.5 noch zickt
+    # Wir nutzen 1.5-flash oder 2.0-flash (was bei dir aktiv ist)
     model = "gemini-1.5-flash" 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_KEY}"
     timestamp = get_current_time()
     
+    # DER FINORA PROMPT - Hier entsteht die Magie
     prompt = f"""
-    Erstelle eine professionelle Finora-Style Analyse für {coin}/USDT (4H-Chart) am {timestamp}.
-    KINGLEY3370 Analyse-Auftrag.
+    Du bist 'Sentinel Alpha 3.0', ein High-End Krypto-Analyst mit Fokus auf Smart Money Concepts (SMC).
+    Erstelle eine Analyse für {coin}/USDT (4H-Chart) für kingley3370.
     
-    DATEN:
+    DATEN STAND {timestamp}:
     - Aktueller Preis: {stats['price']} USDT
-    - RSI: {stats['rsi']}
-    - Letztes Hoch: {stats['high']}
-    - Letztes Tief: {stats['low']}
+    - 20-Perioden High: {stats['high']}
+    - 20-Perioden Low: {stats['low']}
     
-    Struktur: 
-    1. Begrüßung kingley3370 & Datum
-    2. Allgemeine Einschätzung & SMC Tech (FVG, Sweeps, CHoCH)
-    3. Kritische Level & Trading Setups (Entry, SL, TP)
-    4. Bias & Erwartung
-    Nutze viele Emojis und Markdown.
+    STRUKTUR (Finora AI Style):
+    1. ### 📅 Analyse vom {timestamp}
+       Begrüße kingley3370 professionell.
+    
+    2. ### 📊 Allgemeine Einschätzung:
+       Analysiere die aktuelle Lage im 4H-Zeitrahmen. Wo steht der Preis im Verhältnis zum Equilibrium ({stats['low']} bis {stats['high']})?
+    
+    3. ### 🛡️ Technische Analyse & Smart Money Concepts:
+       Diskutiere Liquiditäts-Sweeps, FVG-Zonen (Fair Value Gaps), Orderblocks und Market Structure (BOS/CHoCH).
+    
+    4. ### 📍 Kritische Preislevel:
+       Nenne exakte Widerstände und Unterstützungen basierend auf den Daten.
+    
+    5. ### ⚡ Mögliche Trading-Setups:
+       Erstelle ein Short- und ein Long-Setup mit konkreten 🎯 Entry, 🛑 Stop-Loss und 💰 Take-Profit Zonen.
+    
+    6. ### 🎯 Meine Erwartung:
+       Gib einen klaren Bias ab. Beende mit: "Dies ist keine Anlageberatung... handle mit Bedacht."
+
+    Schreibe auf Deutsch, nutze viele Emojis und Markdown-Formatierung.
     """
     
     try:
-        response = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=20)
+        response = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=30)
         res_data = response.json()
         return res_data['candidates'][0]['content']['parts'][0]['text']
     except Exception as e:
-        print(f"❌ Gemini Fehler: {e}")
+        print(f"❌ Gemini Fehler ({coin}): {e}")
         return None
 
 def send_to_discord():
-    if not WEBHOOK:
-        print("❌ WEBHOOK SECRET FEHLT!")
-        return
-
+    if not WEBHOOK: return
     for coin in ["BTC", "SOL", "SUI"]:
         print(f"🔄 Verarbeite {coin}...")
         stats = get_live_data(coin)
         if stats:
             text = get_crypto_analysis(coin, stats)
             if text:
-                res = requests.post(WEBHOOK, json={"username": f"Sentinel | {coin}", "content": text[:2000]})
-                if res.status_code in [200, 204]:
-                    print(f"✅ {coin} gesendet!")
-                else:
-                    print(f"❌ Discord Fehler: {res.status_code}")
-        time.sleep(5)
+                requests.post(WEBHOOK, json={
+                    "username": f"Sentinel Alpha | {coin}",
+                    "avatar_url": "https://i.imgur.com/8N7j5fX.png",
+                    "content": text[:2000]
+                })
+                print(f"✅ {coin} gesendet!")
+        time.sleep(10)
 
 if __name__ == "__main__":
     send_to_discord()
