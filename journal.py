@@ -1,46 +1,37 @@
 import requests
 import json
+import os
 
-# Deine Daten
-WEBHOOK = "https://discord.com/api/webhooks/1487819789731758170/vffd2_Ox6XrW9YP-S4-PBsHA76MxXGua9Kw4cVZRGkhiw_4wCLQNXiB9kiUJayqxU9N6"
-GEMINI_KEY = "AIzaSyD3787AesVRWKyhnPFFZR773FMiFu2vuxM"
+# Holt die Daten aus den GitHub Secrets
+WEBHOOK = os.getenv("DISCORD_WEBHOOK")
+GEMINI_KEY = os.getenv("GEMINI_KEY")
 
 def get_analysis():
-    # Wir nutzen hier das brandneue 2.0 Flash Modell für maximale Präzision
-    model = "gemini-2.0-flash" 
+    # Wir nutzen 1.5-flash – das ist 2026 am stabilsten im Free-Tier
+    model = "gemini-1.5-flash" 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_KEY}"
     
     prompt = (
-        "Du bist das 'Sentinel Alpha 3.0 Journal'. Erstelle eine hochpräzise Marktanalyse "
-        "für BTC, SOL und SUI auf Deutsch. Fokus: 4-Stunden-Chart (4H).\n\n"
-        "Struktur:\n"
-        "1. Professionelle Headline mit Emojis\n"
-        "2. Kurze, knackige Analyse zu BTC, SOL und SUI (getrennte Sektionen)\n"
-        "3. Sentiment-Check (Bullish/Bearish) pro Coin.\n"
-        "Verwende Fettdruck und Listen für beste Lesbarkeit in Discord."
+        "Analysiere BTC, SOL und SUI auf dem 4H-Chart. "
+        "Schreibe auf Deutsch, nutze Emojis und Headlines. Sei präzise."
     )
     
-    payload = {"contents": [{"parts": [{"text": prompt}]}]}
-    response = requests.post(url, json=payload)
-    data = response.json()
-
-    # Sicherheits-Check
-    if 'candidates' not in data:
-        error_text = f"⚠️ Gemini API Fehler ({model}): {json.dumps(data.get('error', data))}"
-        print(error_text)
-        return error_text
+    try:
+        response = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]})
+        data = response.json()
         
-    return data['candidates'][0]['content']['parts'][0]['text']
+        # Falls Gemini eine Fehlermeldung schickt, poste sie in Discord
+        if "error" in data:
+            return f"❌ Gemini-Fehler: {data['error']['message']}"
+            
+        return data['candidates'][0]['content']['parts'][0]['text']
+    except Exception as e:
+        return f"❌ Script-Fehler: {str(e)}"
 
 def send_to_discord():
-    analysis_text = get_analysis()
-    
-    payload = {
-        "username": "Sentinel Alpha | 3.0 Flash",
-        "avatar_url": "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
-        "content": analysis_text
-    }
-    
+    text = get_analysis()
+    # Sicherstellen, dass der Text nicht zu lang für Discord ist
+    payload = {"username": "Sentinel Alpha 3.0", "content": text[:2000]}
     requests.post(WEBHOOK, json=payload)
 
 if __name__ == "__main__":
