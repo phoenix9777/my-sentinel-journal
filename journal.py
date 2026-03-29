@@ -6,8 +6,8 @@ WEBHOOK = "https://discord.com/api/webhooks/1487819789731758170/vffd2_Ox6XrW9YP-
 GEMINI_KEY = "AIzaSyD3787AesVRWKyhnPFFZR773FMiFu2vuxM"
 
 def get_analysis():
-    # Upgrade auf Gemini 3.0 Flash Preview
-    model = "gemini-3.0-flash" 
+    # Wir nutzen hier das brandneue 2.0 Flash Modell für maximale Präzision
+    model = "gemini-2.0-flash" 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_KEY}"
     
     prompt = (
