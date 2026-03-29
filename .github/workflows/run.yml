@@ -11,7 +11,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11' # <-- DAS HIER IST ENTSCHEIDEND!
-      - run: pip install requests numpy
+      - run: pip install requests python-binance
       - name: Journal senden
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
