@@ -1,25 +1,19 @@
 name: 4H Journal Autopilot
-
 on:
   schedule:
-    # Das bedeutet: Alle 4 Stunden ausführen
     - cron: "0 */4 * * *"
-  workflow_dispatch: # Erlaubt es dir, den Bot auch manuell zu testen
-
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Code laden
-        uses: actions/checkout@v3
-
-      - name: Python installieren
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.9'
-
-      - name: requests installieren
-        run: pip install requests
-
+      - run: pip install requests
       - name: Journal senden
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: python journal.py
