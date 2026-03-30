@@ -1,94 +1,91 @@
 import os
 import time
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 
+# Secrets abrufen
 WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 
-def get_current_time():
-    return datetime.now().strftime("%d.%m.%Y | %H:%M")
+def get_berlin_time():
+    # Berechnet die Zeit für Deutschland (UTC+1 oder UTC+2)
+    # Da wir März 2026 haben, ist bereits Sommerzeit (UTC+2)
+    berlin_time = datetime.utcnow() + timedelta(hours=2)
+    return berlin_time.strftime("%d.%m.%Y | %H:%M")
 
 def get_live_data(coin_id):
     try:
-        # CoinGecko Public API (No Key needed)
-        url = f"https://api.coingecko.com/api/v3/coins/{coin_id}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false"
-        response = requests.get(url, timeout=15)
-        data = response.json()
-        
-        market_data = data['market_data']
-        current_price = market_data['current_price']['usd']
-        high_24h = market_data['high_24h']['usd']
-        low_24h = market_data['low_24h']['usd']
+        url = f"https://api.coingecko.com/api/v3/coins/{coin_id}?localization=false&tickers=false&market_data=true"
+        data = requests.get(url, timeout=15).json()
+        market = data['market_data']
         
         return {
-            "price": current_price,
-            "high": high_24h,
-            "low": low_24h,
-            "equilibrium": round((high_24h + low_24h) / 2, 4),
-            "change_24h": market_data['price_change_percentage_24h']
+            "price": market['current_price']['usd'],
+            "high": market['high_24h']['usd'],
+            "low": market['low_24h']['usd'],
+            "change": market['price_change_percentage_24h'],
+            "ath": market['ath']['usd']
         }
     except Exception as e:
-        print(f"❌ CoinGecko Fehler bei {coin_id}: {e}")
+        print(f"Datenfehler: {e}")
         return None
 
-def get_crypto_analysis(coin_name, stats):
-    # Gemini 2.5 Flash mit stabilem v1 Pfad
-    model = "gemini-2.5-flash" 
+def get_crypto_analysis(symbol, stats):
+    model = "gemini-2.5-flash"
     url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent?key={GEMINI_KEY}"
-    timestamp = get_current_time()
+    timestamp = get_berlin_time()
     
+    # Der ultimative Finora-Prompt
     prompt = f"""
-    Du bist 'Sentinel Alpha 3.0', ein High-End Krypto-Analyst (Finora AI Style).
-    Erstelle eine EXTREM AUSFÜHRLICHE 4H-Analyse für {coin_name}/USD für kingley3370.
+    Du bist 'Sentinel Alpha 3.0', ein High-End Trading-Algorithmus (Finora AI Style).
+    Erstelle eine EXTREM DETAILLIERTE 4H-Analyse für {symbol}/USD.
     
-    DATEN ({timestamp}):
+    DATEN STAND {timestamp}:
     - Preis: {stats['price']} USD
-    - 24H High: {stats['high']} | 24H Low: {stats['low']}
-    - 24H Change: {stats['change_24h']}%
-    - Equilibrium: {stats['equilibrium']}
+    - 24H Range: {stats['low']} - {stats['high']}
+    - 24H Change: {stats['change']}%
     
-    DEINE STRUKTUR (Finora AI Style):
-    ### 📅 Analyse vom {timestamp}
-    (Begrüße kingley3370 persönlich.)
+    STRUKTUR-VORGABE (Halte dich exakt daran!):
     
-    ### 📊 Allgemeine Einschätzung:
-    (Equilibrium-Check, Trend-Dynamik, Volumen-Interpretation.)
+    🗓️ **Analyse vom {timestamp}**
+    Sei gegrüßt, kingley3370! 🫡 Sentinel Alpha 3.0 ist online. Hier ist deine institutionelle 4H-Analyse.
     
-    ### 🛡️ Technische Analyse & Smart Money Concepts:
-    (FVG-Zonen, Liquiditäts-Sweeps, Orderblocks, BOS/CHoCH basierend auf den Range-Daten.)
+    📊 **Allgemeine Einschätzung:**
+    - Aktueller Preis & Lage in der Handelsspanne (Oben/Unten).
+    - Berechne das Gleichgewichtsniveau (Equilibrium) aus {stats['low']} und {stats['high']}.
+    - Trendbewertung: Nutze Indikatoren-Symbole (z.B. 🔴 RSI bärisch, 🟢 ADX bullisch).
+    - Kommentar zu Volatilität und Volumen.
     
-    ### 📍 Kritische Preislevel:
-    (Nenne exakte Widerstände & Supports in USD.)
+    🛡️ **Technische Analyse & Smart Money Concepts:**
+    - Analysiere Ausbrüche, Impulsbewegungen und Liquiditäts-Sweeps (Manipulation).
+    - Nenne konkrete Zonen: FVG (Fair Value Gaps), Orderblocks (OB), Demand/Supply.
+    - Achte auf Market Structure (BOS / CHoCH).
     
-    ### ⚡ Mögliche Trading-Setups:
-    (Detaillierte Long & Short Szenarien mit 🎯 Entry, 🛑 SL, 💰 TP.)
+    📍 **Kritische Preislevel:**
+    - Liste mindestens 5 Widerstände und 3 Unterstützungen mit exakten Werten auf.
+    - Nutze 🔴 für Widerstände und 🟢 für Unterstützungen.
     
-    ### 🎯 Meine Erwartung:
-    (Klarer Bias für kingley3370. Favorit-Szenario.)
+    ⚡ **Mögliche Trading-Setups:**
+    - Erstelle ein detailliertes 'Short-Setup' und ein 'Long-Setup (Reversal)'.
+    - Nenne Bedingungen für den Einstieg (z.B. Pin-Bar, Engulfing auf 15min/1h).
+    - Definiere 🎯 Entry, 🛑 Stop-Loss und 💰 Take-Profit.
+    
+    🎯 **Meine Erwartung (Sentinel AI):**
+    - Gib deinen klaren Bias ab. Was ist dein Favorit-Szenario?
+    - Beende mit dem Disclaimer: "Dies ist keine Anlageberatung... handle mit Bedacht."
 
-    Schreibe auf Deutsch, nutze viele Emojis und Markdown. Beende mit Disclaimer.
+    FORMATIERUNG: Nutze Fettdruck, Listen und viele Emojis. Sei ausführlich wie ein Profi-Analyst.
     """
     
     try:
         response = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=40)
-        res_data = response.json()
-        if 'candidates' in res_data:
-            return res_data['candidates'][0]['content']['parts'][0]['text']
-        else:
-            print(f"⚠️ API Fehler: {res_data}")
-            return None
-    except Exception as e:
-        print(f"❌ Gemini Fehler: {e}")
+        return response.json()['candidates'][0]['content']['parts'][0]['text']
+    except:
         return None
 
 def send_to_discord():
-    if not WEBHOOK: return
-    # CoinGecko IDs: 'bitcoin', 'solana', 'sui'
     coins = {"BTC": "bitcoin", "SOL": "solana", "SUI": "sui"}
-    
     for symbol, cg_id in coins.items():
-        print(f"🔄 Analysiere {symbol} via CoinGecko...")
         stats = get_live_data(cg_id)
         if stats:
             text = get_crypto_analysis(symbol, stats)
@@ -96,10 +93,9 @@ def send_to_discord():
                 requests.post(WEBHOOK, json={
                     "username": f"Sentinel Alpha | {symbol}",
                     "avatar_url": "https://i.imgur.com/8N7j5fX.png",
-                    "content": text[:2000]
+                    "content": text[:1990] # Discord Limit
                 })
-                print(f"🚀 {symbol} gesendet!")
-        time.sleep(15) # CoinGecko Rate Limit Schutz
+        time.sleep(15)
 
 if __name__ == "__main__":
     send_to_discord()
