@@ -7,12 +7,13 @@ WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 
 def get_berlin_time():
-    # UTC+2 (Sommerzeit 2026)
+    # UTC+2 (März 2026 Sommerzeit)
     return (datetime.utcnow() + timedelta(hours=2)).strftime("%d.%m.%Y | %H:%M")
 
 def get_market_data(coin_id):
     try:
         headers = {'User-Agent': 'Mozilla/5.0'}
+        # 30 Tage Historie für EMA-Berechnung
         url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=30&interval=daily"
         res = requests.get(url, headers=headers, timeout=20)
         
@@ -27,7 +28,7 @@ def get_market_data(coin_id):
         high_24h = max(prices[-2:])
         low_24h = min(prices[-2:])
         
-        # Berechnung EMA 10 (kurz) und EMA 30 (lang) für Cross-Erkennung auf Basis der 30 Tage
+        # EMA-Berechnung (10er Fast / 25er Slow)
         def calc_ema(p_list, period):
             k = 2 / (period + 1)
             ema = sum(p_list[:period]) / period
@@ -38,12 +39,12 @@ def get_market_data(coin_id):
         ema_fast = calc_ema(prices, 10)
         ema_slow = calc_ema(prices, 25)
         
-        # Cross-Logik
+        # Cross-Logik (FEHLER BEHOBEN: ema_fast statt path_fast)
         cross_msg = "🟡 Neutral"
         if ema_fast > ema_slow:
-            cross_msg = "🟢 GOLDEN CROSS (Bullischer Trendwechsel)"
-        elif path_fast < ema_slow:
-            cross_msg = "💀 DEATH CROSS (Bärischer Trendwechsel)"
+            cross_msg = "🟢 GOLDEN CROSS (Bullisch)"
+        elif ema_fast < ema_slow:
+            cross_msg = "💀 DEATH CROSS (Bärisch)"
 
         return {
             "p": round(current_p, 2),
@@ -55,14 +56,14 @@ def get_market_data(coin_id):
             "is_breakout": current_p >= high_24h
         }
     except Exception as e:
-        print(f"❌ Fehler: {e}")
+        print(f"❌ Fehler bei {coin_id}: {e}")
         return None
 
 def get_crypto_analysis(symbol, s):
     url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
     t = get_berlin_time()
     
-    breakout_status = "🚨 BREAKOUT ALARM: Kurs testet lokales Hoch!" if s['is_breakout'] else "Markt konsolidiert in der Range."
+    breakout_status = "🚨 BREAKOUT ALARM: Kurs testet lokales Hoch!" if s['is_breakout'] else "Markt konsolidiert."
 
     prompt = f"""
     Schreibe eine ELITE 4H-Analyse für {symbol}/USD (Finora AI Style).
@@ -73,26 +74,28 @@ def get_crypto_analysis(symbol, s):
        {breakout_status}
     2. 📊 **Trend-Check & EMA Cross:**
        - Aktuelles Signal: {s['cross']}
-       - Analyse der EMA-Lage (Fast vs. Slow).
+       - Lage: Preis steht bei {s['p']} USD.
     3. 🛡️ **SMC & Zonen:**
        - Kauf-Zone 🟢 und Verkaufs-Zone 🔴 definieren.
-       - Erwähne FVG-Gaps und Liquiditätssweeps.
+       - Erwähne Liquiditätssweeps und FVG-Gaps.
     4. ⚡ **Szenarien (Dual):**
-       - Bullisch 🚀: Ziel bei Bruch von {s['h']}.
-       - Bärisch 🐻: Risiko bei Fall unter {s['l']}.
+       - Bullisch 🚀: Was passiert bei Bruch von {s['h']}?
+       - Bärisch 🐻: Was passiert bei Bruch von {s['l']}?
     5. 📍 **Key Levels:**
-       - Support (🟢) und Resistance (🔴) mit exakten Preisen.
+       - Support (🟢) und Resistance (🔴) mit Preisen.
     6. 🛑 **Sentinel Handels-Empfehlung:**
-       - Gib kingley3370 eine klare Ansage: **KAUFEN**, **VERKAUFEN** oder **ABWARTEN**.
-       - Begründe die Entscheidung kurz (Risk/Reward).
+       - Gib kingley3370 eine klare Ansage: KAUFEN, VERKAUFEN oder ABWARTEN.
+       - Begründe kurz das Risk/Reward.
     
+    Zusatz: Nenne den Preis kurz in EURO für die Steuer-Dokumentation.
     Disclaimer am Ende.
     """
     
     try:
         response = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=60)
         return response.json()['candidates'][0]['content']['parts'][0]['text']
-    except: return None
+    except:
+        return None
 
 def send_to_discord():
     coins = {"BTC": "bitcoin", "SOL": "solana", "SUI": "sui"}
@@ -100,10 +103,11 @@ def send_to_discord():
         print(f"--- Starte: {sym} ---")
         stats = get_market_data(cid)
         if stats:
+            print(f"✅ Daten erhalten für {sym}. Generiere Analyse...")
             text = get_crypto_analysis(sym, stats)
             if text:
                 requests.post(WEBHOOK, json={"username": f"Sentinel Elite | {sym}", "content": text})
-                print(f"✅ {sym} gesendet.")
+                print(f"🚀 {sym} gesendet!")
         time.sleep(30)
 
 if __name__ == "__main__":
