@@ -1,20 +1,29 @@
 name: 4H Journal Autopilot
+
 on:
   schedule:
-    - cron: "0 */4 * * *"
-  workflow_dispatch:
+    - cron: "0 */4 * * *" # Läuft alle 4 Stunden
+  workflow_dispatch:      # Ermöglicht manuelles Starten
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12' # <-- DAS HIER IST ENTSCHEIDEND!
-      - run: pip install requests pandas pandas-ta discord.py
-
+          python-version: '3.12' # Wichtig für pandas-ta
+          
+      - name: Install dependencies
+        run: pip install requests pandas pandas-ta discord.py
+        
       - name: Journal senden
         env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # HIER müssen alle Keys gelistet sein:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          CRYPTOCOMPARE_KEY: ${{ secrets.CRYPTOCOMPARE_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
         run: python journal.py
