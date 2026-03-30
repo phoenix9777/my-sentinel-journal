@@ -7,102 +7,114 @@ WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 
 def get_berlin_time():
+    # UTC+2 für Berlin (März 2026 Sommerzeit)
     return (datetime.utcnow() + timedelta(hours=2)).strftime("%d.%m.%Y | %H:%M")
-
-def calculate_ema(prices, period):
-    if len(prices) < period: return None
-    k = 2 / (period + 1)
-    ema = prices[0]
-    for price in prices[1:]:
-        ema = (price * k) + (ema * (1 - k))
-    return round(ema, 2)
 
 def get_market_data(coin_id):
     try:
         headers = {'User-Agent': 'Mozilla/5.0'}
-        # Aktuelle Daten
-        url_now = f"https://api.coingecko.com/api/v3/coins/{coin_id}?localization=false&tickers=false&market_data=true"
-        # Historische Daten für EMA (30 Tage)
-        url_hist = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=30&interval=daily"
+        # Wir holen 30 Tage Historie für EMA und Range
+        url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=30&interval=daily"
+        res = requests.get(url, headers=headers, timeout=20)
         
-        res_now = requests.get(url_now, headers=headers, timeout=20).json()
-        res_hist = requests.get(url_hist, headers=headers, timeout=20).json()
+        if res.status_code != 200:
+            print(f"❌ API Fehler bei {coin_id}: Status {res.status_code}")
+            return None
+            
+        data = res.json()
+        prices = [p[1] for p in data['prices']]
         
-        m = res_now['market_data']
-        prices = [p[1] for p in res_hist['prices']]
+        current_p = prices[-1]
+        # Range der letzten 2 Tage
+        high_24h = max(prices[-2:])
+        low_24h = min(prices[-2:])
         
-        ema50 = calculate_ema(prices, 50) if len(prices) >= 30 else None # Näherungswert
-        ema200 = calculate_ema(prices, 200) if len(prices) >= 200 else None
+        # EMA-Berechnung (14er Periode als Trend-Indikator)
+        period = 14
+        k = 2 / (period + 1)
+        ema = sum(prices[:period]) / period
+        for price in prices[period:]:
+            ema = (price * k) + (ema * (1 - k))
         
-        cross_status = "Neutral"
-        if ema50 and ema200:
-            if ema50 > ema200: cross_status = "🟡 GOLDEN CROSS (Bullisch)"
-            else: cross_status = "💀 DEATH CROSS (Bärisch)"
-
         return {
-            "p": m['current_price']['usd'],
-            "h": m['high_24h']['usd'],
-            "l": m['low_24h']['usd'],
-            "c": m['price_change_percentage_24h'],
-            "ath": m['ath']['usd'],
-            "ema_status": cross_status,
-            "is_breakout": m['current_price']['usd'] >= m['high_24h']['usd']
+            "p": round(current_p, 2),
+            "h": round(high_24h, 2),
+            "l": round(low_24h, 2),
+            "ema": round(ema, 2),
+            "is_breakout": current_p >= high_24h
         }
     except Exception as e:
-        print(f"Fehler bei {coin_id}: {e}")
+        print(f"❌ Fehler bei Datenabruf {coin_id}: {e}")
         return None
 
 def get_crypto_analysis(symbol, s):
+    # Gemini 2.5 Flash
     url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
     t = get_berlin_time()
     
-    breakout_msg = "🚨 ACHTUNG: PREIS BRICHT GERADE DAS 24H HOCH! (BULLISH BREAKOUT)" if s['is_breakout'] else "Seitwärtsbewegung innerhalb der Range."
+    breakout_status = "🚨 BREAKOUT ALARM: Kurs testet lokales Hoch!" if s['is_breakout'] else "Markt konsolidiert in der Range."
+    trend = "🟢 BULLISCH" if s['p'] > s['ema'] else "🔴 BÄRISCH"
 
     prompt = f"""
-    Erstelle eine PROFESSIONELLE 4H-Analyse für {symbol}/USD (Finora AI Elite Style).
-    DATEN: Preis {s['p']}, High {s['h']}, Low {s['l']}, Change {s['c']}%, EMA: {s['ema_status']}.
+    Schreibe eine ELITE 4H-Analyse für {symbol}/USD (Finora AI Style).
+    DATEN: Preis {s['p']}, High {s['h']}, Low {s['l']}, Trend-Basis (EMA): {s['ema']}.
     
-    STRUKTUR:
+    Layout:
     1. 🗓️ **Analyse vom {t}**
-       {breakout_msg}
-    
-    2. 📊 **Allgemeine Einschätzung & EMA Cross:**
-       - Analyse des {s['ema_status']}. Was bedeutet das für den Trend?
+       {breakout_status}
+    2. 📊 **Allgemeine Einschätzung:**
+       - Status: {trend} (Preis über/unter EMA).
        - Lage zum Equilibrium (Mitte von {s['l']} und {s['h']}).
-    
     3. 🛡️ **SMC & Zonen:**
-       - Kauf-Zone (Demand) 🟢 und Verkaufs-Zone (Supply) 🔴 definieren.
+       - Kauf-Zone 🟢 und Verkaufs-Zone 🔴 definieren.
        - Erwähne FVG-Gaps und Liquiditätssweeps.
-    
-    4. ⚡ **Szenarien (Dual-Weg):**
-       - **Bullisch 🚀**: Bedingung für Anstieg Richtung {s['ath']}.
-       - **Bärisch 🐻**: Risiko bei Bruch von {s['l']}.
-    
+    4. ⚡ **Szenarien (Dual):**
+       - Bullisch 🚀: Ziel bei Bruch von {s['h']}.
+       - Bärisch 🐻: Risiko bei Fall unter {s['l']}.
     5. 📍 **Key Levels:**
-       - Liste Support (🟢) und Resistance (🔴) Linien auf.
-    
+       - Support (🟢) und Resistance (🔴) mit Preisen.
     6. 🎯 **Sentinel Erwartung:**
-       - Favorit-Szenario für kingley3370. Disclaimer.
+       - Dein Bias für kingley3370. Disclaimer.
     """
     
     try:
-        res = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=40)
-        return res.json()['candidates'][0]['content']['parts'][0]['text']
-    except: return None
+        response = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=60)
+        data = response.json()
+        if 'candidates' in data:
+            return data['candidates'][0]['content']['parts'][0]['text']
+        else:
+            print(f"⚠️ Gemini Fehler bei {symbol}: {data}")
+            return None
+    except Exception as e:
+        print(f"❌ Gemini Timeout/Fehler bei {symbol}: {e}")
+        return None
 
 def send_to_discord():
     coins = {"BTC": "bitcoin", "SOL": "solana", "SUI": "sui"}
+    
     for sym, cid in coins.items():
-        print(f"Verarbeite {sym}...")
+        print(f"--- Starte Verarbeitung: {sym} ---")
         stats = get_market_data(cid)
+        
         if stats:
+            print(f"✅ Daten für {sym} erhalten. Generiere Analyse...")
             text = get_crypto_analysis(sym, stats)
+            
             if text:
-                requests.post(WEBHOOK, json={
+                res = requests.post(WEBHOOK, json={
                     "username": f"Sentinel Elite | {sym}",
                     "content": text
                 })
-        time.sleep(25) # Höheres Delay für EMA-Abfragen (Rate Limit!)
+                if res.status_code in [200, 204]:
+                    print(f"🚀 {sym} erfolgreich an Discord gesendet!")
+                else:
+                    print(f"❌ Discord Fehler bei {sym}: {res.status_code}")
+            else:
+                print(f"⚠️ Analyse für {sym} konnte nicht erstellt werden.")
+        
+        # WICHTIG: 30 Sekunden echte Pause zwischen den Coins
+        print(f"⏳ Pause (30s) vor dem nächsten Coin...")
+        time.sleep(30)
 
 if __name__ == "__main__":
     send_to_discord()
