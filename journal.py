@@ -7,31 +7,23 @@ WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 
 def get_berlin_time():
-    # UTC+2 Sommerzeit 2026
     return (datetime.utcnow() + timedelta(hours=2)).strftime("%d.%m.%Y | %H:%M")
 
-def get_market_data(coin_id):
+def get_binance_data(symbol):
     try:
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        # Einfacherer API-Call: Nur aktuelle Marktdaten, keine Historie
-        url = f"https://api.coingecko.com/api/v3/coins/{coin_id}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false"
-        res = requests.get(url, headers=headers, timeout=30)
-        
-        if res.status_code != 200:
-            print(f"❌ CoinGecko Fehler bei {coin_id}: Status {res.status_code}")
-            return None
-            
+        # 24h Ticker Daten von Binance
+        url = f"https://api.binance.com/api/v3/ticker/24hr?symbol={symbol}USDT"
+        res = requests.get(url, timeout=10)
         data = res.json()
-        m = data['market_data']
         
         return {
-            "p": m['current_price']['usd'],
-            "h": m['high_24h']['usd'],
-            "l": m['low_24h']['usd'],
-            "c": m['price_change_percentage_24h']
+            "p": float(data['lastPrice']),
+            "h": float(data['highPrice']),
+            "l": float(data['lowPrice']),
+            "c": float(data['priceChangePercent'])
         }
     except Exception as e:
-        print(f"❌ Fehler bei {coin_id}: {e}")
+        print(f"❌ Binance Fehler bei {symbol}: {e}")
         return None
 
 def get_crypto_analysis(symbol, s):
@@ -39,7 +31,7 @@ def get_crypto_analysis(symbol, s):
     t = get_berlin_time()
     
     prompt = f"""
-    Schreibe eine ELITE 4H-Analyse für {symbol}/USD (Finora AI Style).
+    Schreibe eine ELITE 4H-Analyse für {symbol}/USDT (Finora AI Style).
     Daten: Preis {s['p']}, High {s['h']}, Low {s['l']}, Change {s['c']}%.
     
     Layout:
@@ -52,23 +44,24 @@ def get_crypto_analysis(symbol, s):
     """
     
     try:
-        res = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=60)
+        res = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=40)
         return res.json()['candidates'][0]['content']['parts'][0]['text']
     except: return None
 
 def send_to_discord():
-    coins = {"BTC": "bitcoin", "SOL": "solana", "SUI": "sui"}
-    for sym, cid in coins.items():
+    # Binance nutzt Symbole wie BTC, SOL, SUI
+    coins = ["BTC", "SOL", "SUI"]
+    for sym in coins:
         print(f"--- Verarbeite {sym} ---")
-        stats = get_market_data(cid)
+        stats = get_binance_data(sym)
         if stats:
             text = get_crypto_analysis(sym, stats)
             if text:
                 requests.post(WEBHOOK, json={"username": f"Sentinel Elite | {sym}", "content": text[:1990]})
-                print(f"🚀 {sym} gesendet!")
+                print(f"🚀 {sym} erfolgreich gesendet!")
         
-        print("Warte 45 Sekunden...")
-        time.sleep(45) # Maximale Sicherheit gegen Rate-Limits
+        # Nur 5 Sekunden Pause, Binance ist schnell!
+        time.sleep(5)
 
 if __name__ == "__main__":
     send_to_discord()
