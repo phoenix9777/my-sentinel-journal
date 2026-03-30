@@ -18,47 +18,38 @@ def fetch_ohlcv(symbol, limit, timeframe):
 
 def get_ai_content(symbol, d, mode="web"):
     url = "https://api.groq.com/openai/v1/chat/completions"
-    
     if mode == "web":
-        prompt = f"""
-        Schreibe eine hochprofessionelle SMC-Analyse für {symbol} ({d['p']}$):
-        - 24h Range: {d['l24']}$ bis {d['h24']}$ (Mid: {d['mid']}$)
-        - Bias: 1h:{d['b1']}, 4h:{d['b4']}, Daily:{d['b1d']}
-        - RSI: {d['rsi']:.1f}
-        
-        STRUKTUR (STRENG):
-        🔎 Allgemeine Einschätzung
-        📈 Wichtige Preislevels (Support/Resistance & Liquidität)
-        💡 Trade-Idee & Setup (Manipulation unter {d['l24']}$ oder über {d['h24']}$ einbauen)
-        🌌 Erwartung (King Volkan AI)
-        
-        Stil: Eiskalt, institutionell, präzise. Deutsch.
-        """
+        prompt = f"Schreibe eine institutionelle SMC-Analyse für {symbol} ({d['p']}$): 24h Range: {d['l24']}$ bis {d['h24']}$. Struktur: 1h:{d['b1']}, 4h:{d['b4']}, Daily:{d['b1d']}. RSI:{d['rsi']:.1f}. Nutze die Sektionen: 🔎 Allgemeine Einschätzung, 📈 Preislevels, 💡 Trade-Idee, 🌌 Erwartung (King Volkan AI). Deutsch, eiskalt, präzise."
     else:
-        prompt = f"Fasse die Lage für {symbol} ({d['p']}$) in 2 kurzen Sätzen zusammen. Fokus auf Bias 1h:{d['b1']}, 4h:{d['b4']}, 1d:{d['b1d']}. Sei direkt."
+        prompt = f"Fasse die Lage für {symbol} ({d['p']}$) in 2 Sätzen zusammen. Bias 1h:{d['b1']}, 4h:{d['b4']}, 1d:{d['b1d']}. King Volkan Style."
 
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     payload = {"model": "llama-3.3-70b-versatile", "messages": [{"role": "user", "content": prompt}], "temperature": 0.2}
     try:
         res = requests.post(url, json=payload, headers=headers).json()
         return res['choices'][0]['message']['content']
-    except: return "Fehler."
+    except: return "KI-Fehler."
 
 def analyze_coin(symbol):
     df_1h = fetch_ohlcv(symbol, 400, "hour")
     df_1d = fetch_ohlcv(symbol, 250, "day")
     if df_1h is None or df_1d is None: return None
 
+    # --- FIX FÜR ATR & TA ---
     last_p = df_1h['close'].iloc[-1]
     h24, l24 = df_1h['high'].iloc[-24:].max(), df_1h['low'].iloc[-24:].min()
     mid = round((h24 + l24) / 2, 2)
-    df_1h.ta.atr(append=True); atr = df_1h['ATR_14'].iloc[-1]
     
-    df_1d.ta.ema(length=200, append=True); ema200 = df_1d['EMA_200'].iloc[-1]
-    b1d = "Bullish 🟢" if last_p > ema200 else "Bearish 🔴"
+    # ATR berechnen und sicher abrufen
+    atr_df = df_1h.ta.atr(length=14)
+    atr = atr_df.iloc[-1] if atr_df is not None else 0
+
+    df_1d.ta.ema(length=200, append=True)
+    b1d = "Bullish 🟢" if last_p > df_1d['EMA_200'].iloc[-1] else "Bearish 🔴"
 
     df_4h = df_1h.set_index('time').resample('4h').agg({'open':'first','high':'max','low':'min','close':'last','volumeto':'sum'}).dropna().reset_index()
-    df_4h.ta.rsi(length=14, append=True); rsi = df_4h['RSI_14'].iloc[-1]
+    df_4h.ta.rsi(length=14, append=True)
+    rsi = df_4h['RSI_14'].iloc[-1]
     b4 = "Bullish 🟢" if rsi > 55 else "Bearish 🔴" if rsi < 45 else "Neutral 🟠"
 
     df_1h.ta.ema(length=20, append=True); df_1h.ta.ema(length=50, append=True)
@@ -108,7 +99,7 @@ def generate_html_report(symbol, d):
 
 def send_embed(symbol, d, web_url):
     webhook = SyncWebhook.from_url(WEBHOOK_URL)
-    color = Color.from_rgb(255, 202, 40) # Gold für den King
+    color = Color.from_rgb(255, 202, 40)
     embed = Embed(title=f"👑 KING VOLKAN ANALYZER: {symbol}", color=color, url=web_url)
     embed.add_field(name="💵 Preis", value=f"**{d['p']:,} $**", inline=True)
     embed.add_field(name="🧠 Short-Insight", value=f"*{d['short_insight']}*", inline=False)
