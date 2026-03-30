@@ -35,20 +35,20 @@ def analyze_coin(symbol):
     
     if df_1h is None or df_1d is None: return None
 
-    # Resample 1H to 4H (Wichtig für korrekten RSI/MACD)
+    # Resample 1h to 4h (Wichtig für korrekten RSI/MACD)
     df_4h.set_index('time', inplace=True)
     df_4h = df_4h.resample('4H').agg({'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volumeto': 'sum'}).dropna().reset_index()
 
     # --- MTF BIAS BERECHNUNG ---
     
-    # Short-term (1H): EMA 20/50 Cross
+    # Short-term (1h): EMA 20/50 Cross
     df_1h.ta.ema(length=20, append=True)
     df_1h.ta.ema(length=50, append=True)
     ema_20 = df_1h['EMA_20'].iloc[-1]
     ema_50 = df_1h['EMA_50'].iloc[-1]
     bias_1h = "🟩 Bullish (EMA 20 > 50)" if ema_20 > ema_50 else "🟥 Bearish (EMA 20 < 50)"
 
-    # Medium-term (4H): RSI & MACD
+    # Medium-term (4h): RSI & MACD
     df_4h.ta.rsi(length=14, append=True)
     df_4h.ta.macd(append=True)
     rsi_4h = df_4h['RSI_14'].iloc[-1]
@@ -58,7 +58,7 @@ def analyze_coin(symbol):
     elif rsi_4h < 45 and macd_h < 0: bias_4h = "🟥 Bearish (RSI/MACD Confirm)"
     else: bias_4h = "🟧 Neutral"
 
-    # Long-term (1D): Marktstruktur (HH/LL)
+    # Long-term (1d): Marktstruktur (HH/LL)
     # Vereinfachte Logik: Vergleiche aktuelles Close mit EMA 200
     df_1d.ta.ema(length=50, append=True) # Wir nutzen EMA50 daily als Proxy für Struktur
     current_price = df_1d['close'].iloc[-1]
