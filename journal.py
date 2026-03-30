@@ -19,24 +19,26 @@ def fetch_ohlcv(symbol, limit, timeframe):
 def generate_html_report(symbol, d, web_url):
     html_template = f"""
     <!DOCTYPE html>
-    <html>
+    <html lang="de">
     <head>
+        <meta charset="UTF-8">
         <title>Sentinel Intelligence - {symbol}</title>
         <style>
-            body {{ background: #0d1117; color: white; font-family: -apple-system, sans-serif; padding: 20px; }}
+            body {{ background: #0d1117; color: white; font-family: -apple-system, sans-serif; padding: 20px; line-height: 1.6; }}
             .container {{ max-width: 1000px; margin: auto; background: #161b22; padding: 30px; border-radius: 15px; border: 1px solid #30363d; }}
             .header {{ display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 20px; }}
             .status {{ padding: 10px 20px; border-radius: 8px; font-weight: bold; }}
-            .bullish {{ background: #238636; }} .bearish {{ background: #da3633; }}
+            .bullish {{ background: #238636; }} .bearish {{ background: #da3633; }} .neutral {{ background: #d29922; }}
             .chart-box {{ margin-top: 30px; height: 600px; border-radius: 10px; overflow: hidden; border: 1px solid #30363d; }}
             .insight {{ background: #0d1117; padding: 20px; border-radius: 10px; border-left: 4px solid #58a6ff; margin: 20px 0; }}
+            h1, h3 {{ color: #58a6ff; }}
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
                 <h1>{symbol}/USD Analysis</h1>
-                <div class="status {'bullish' if '🟢' in d['b1d'] else 'bearish'}">{d['b1d']}</div>
+                <div class="status {'bullish' if '🟢' in d['b1d'] else 'bearish' if '🔴' in d['b1d'] else 'neutral'}">{d['b1d']}</div>
             </div>
             <div class="insight">
                 <h3>🧠 Sentinel Insight</h3>
@@ -78,12 +80,15 @@ def analyze_coin(symbol):
     df_1d.ta.ema(length=50, append=True); df_1d.ta.ema(length=200, append=True)
     last_p = df_1d['close'].iloc[-1]
     ema50_d, ema200_d = df_1d['EMA_50'].iloc[-1], df_1d['EMA_200'].iloc[-1]
-    b1d = "Bullish (Macro) 🟢" if last_p > ema200_d else "Bearish (Macro) 🔴"
+    
+    if last_p > ema50_d and last_p > ema200_d: b1d = "Bullish (Macro) 🟢"
+    elif last_p < ema200_d: b1d = "Bearish (Macro Trend) 🔴"
+    else: b1d = "Neutral/Range 🟠"
 
     df_4h = df_1h.set_index('time').resample('4h').agg({'open':'first','high':'max','low':'min','close':'last','volumeto':'sum'}).dropna().reset_index()
     df_4h.ta.rsi(length=14, append=True); df_4h.ta.macd(append=True)
     rsi, macd = df_4h['RSI_14'].iloc[-1], df_4h['MACDh_12_26_9'].iloc[-1]
-    b4 = "Bullish 🟢" if rsi > 55 and macd > 0 else "Bearish 🔴" if rsi < 45 else "Neutral 🟠"
+    b4 = "Bullish 🟢" if (rsi > 55 and macd > 0) else "Bearish 🔴" if rsi < 45 else "Neutral 🟠"
 
     df_1h.ta.ema(length=20, append=True); df_1h.ta.ema(length=50, append=True)
     b1 = "Bullish 🟢" if df_1h['EMA_20'].iloc[-1] > df_1h['EMA_50'].iloc[-1] else "Bearish 🔴"
@@ -98,23 +103,25 @@ def analyze_coin(symbol):
 
 def send_embed(symbol, d, web_url):
     webhook = SyncWebhook.from_url(WEBHOOK_URL)
-    color = Color.green() if "🟢" in d['b1d'] else Color.red()
+    color = Color.green() if "🟢" in d['b1d'] else Color.red() if "🔴" in d['b1d'] else Color.orange()
     embed = Embed(title=f"👑 Institutional Report: {symbol}/USD", color=color, url=web_url)
-    embed.add_field(name="💵 Preis", value=f"**{d['p']:,} $**", inline=True)
-    embed.add_field(name="⏱️ Bias", value=f"1h: {d['b1']}\n4h: {d['b4']}\n1d: {d['b1d']}", inline=True)
+    embed.add_field(name="💵 Marktwert", value=f"**{d['p']:,} $**", inline=True)
+    embed.add_field(name="⏱️ Multi-Timeframe Bias", value=f"1h: {d['b1']}\n4h: {d['b4']}\n1d: {d['b1d']}", inline=True)
     embed.add_field(name="🔗 Web-Analyse", value=f"[Interaktiver Chart & Deep Dive]({web_url})", inline=False)
-    embed.add_field(name="🧠 Insight", value=f"*{d['insight']}*", inline=False)
+    embed.add_field(name="🧠 Sentinel Insight", value=f"*{d['insight']}*", inline=False)
     webhook.send(embed=embed, username="Sentinel Elite")
 
 if __name__ == "__main__":
-    # USER INFO: Passe 'deinname' und 'repo' an
-    GITHUB_USER = "kingley3370" 
+    # DEINE DATEN
+    GITHUB_USER = "phoenix9777" 
     REPO_NAME = "my-sentinel-journal"
     
     for s in ["BTC", "SOL", "SUI"]:
         data = analyze_coin(s)
         if data: 
+            # Erstellt die HTML lokal
             generate_html_report(s, data, "")
+            # Erzeugt die URL für Discord
             web_url = f"https://{GITHUB_USER}.github.io/{REPO_NAME}/{s.lower()}.html"
             send_embed(s, data, web_url)
             time.sleep(2)
