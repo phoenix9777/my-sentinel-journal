@@ -1,27 +1,29 @@
 
     <!DOCTYPE html>
-    <html>
+    <html lang="de">
     <head>
+        <meta charset="UTF-8">
         <title>Sentinel Intelligence - SUI</title>
         <style>
-            body { background: #0d1117; color: white; font-family: -apple-system, sans-serif; padding: 20px; }
+            body { background: #0d1117; color: white; font-family: -apple-system, sans-serif; padding: 20px; line-height: 1.6; }
             .container { max-width: 1000px; margin: auto; background: #161b22; padding: 30px; border-radius: 15px; border: 1px solid #30363d; }
             .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 20px; }
             .status { padding: 10px 20px; border-radius: 8px; font-weight: bold; }
-            .bullish { background: #238636; } .bearish { background: #da3633; }
+            .bullish { background: #238636; } .bearish { background: #da3633; } .neutral { background: #d29922; }
             .chart-box { margin-top: 30px; height: 600px; border-radius: 10px; overflow: hidden; border: 1px solid #30363d; }
             .insight { background: #0d1117; padding: 20px; border-radius: 10px; border-left: 4px solid #58a6ff; margin: 20px 0; }
+            h1, h3 { color: #58a6ff; }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
                 <h1>SUI/USD Analysis</h1>
-                <div class="status bearish">Bearish (Macro) 🔴</div>
+                <div class="status bearish">Bearish (Macro Trend) 🔴</div>
             </div>
             <div class="insight">
                 <h3>🧠 Sentinel Insight</h3>
-                <p>Die Analyse von SUI zeigt eine gemischte Bildung, wobei der 1-Stunden-Chart bullish ist, der 4-Stunden-Chart neutral und der 1-Tages-Chart bearish ist, was auf eine kurzfristige Aufwärtsbewegung, aber eine langfristige Abwärtsbewegung hindeutet. Der RSI-Wert von 48,1 deutet darauf hin, dass das Asset weder überkauft noch überverkauft ist, was eine neutrale Bewertung ergibt. Es ist jedoch wichtig, diese Analyse kritisch zu betrachten und weitere Faktoren wie fundamentale Daten und Marktbedingungen zu berücksichtigen, um eine umfassende Einschätzung zu erhalten.</p>
+                <p>Die Analyse von SUI zeigt ein gemischtes Bild, wobei der 1-Stunden-Chart bullish ist, der 4-Stunden-Chart neutral und der 1-Tages-Chart bearish ist, was auf einen makroökonomischen Abwärtstrend hindeutet. Der RSI-Wert von 46,6 deutet auf eine neutrale bis leicht unterbewertete Position hin, was jedoch im Kontext des bearishen Makrotrends zu sehen ist. Insgesamt sollte man bei SUI mit Vorsicht agieren und die weiteren Entwicklungen genau beobachten, um keine Fehlentscheidungen zu treffen.</p>
             </div>
             <div class="chart-box" id="tv-chart"></div>
         </div>

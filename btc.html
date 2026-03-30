@@ -1,27 +1,29 @@
 
     <!DOCTYPE html>
-    <html>
+    <html lang="de">
     <head>
+        <meta charset="UTF-8">
         <title>Sentinel Intelligence - BTC</title>
         <style>
-            body { background: #0d1117; color: white; font-family: -apple-system, sans-serif; padding: 20px; }
+            body { background: #0d1117; color: white; font-family: -apple-system, sans-serif; padding: 20px; line-height: 1.6; }
             .container { max-width: 1000px; margin: auto; background: #161b22; padding: 30px; border-radius: 15px; border: 1px solid #30363d; }
             .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 20px; }
             .status { padding: 10px 20px; border-radius: 8px; font-weight: bold; }
-            .bullish { background: #238636; } .bearish { background: #da3633; }
+            .bullish { background: #238636; } .bearish { background: #da3633; } .neutral { background: #d29922; }
             .chart-box { margin-top: 30px; height: 600px; border-radius: 10px; overflow: hidden; border: 1px solid #30363d; }
             .insight { background: #0d1117; padding: 20px; border-radius: 10px; border-left: 4px solid #58a6ff; margin: 20px 0; }
+            h1, h3 { color: #58a6ff; }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
                 <h1>BTC/USD Analysis</h1>
-                <div class="status bearish">Bearish (Macro) 🔴</div>
+                <div class="status bearish">Bearish (Macro Trend) 🔴</div>
             </div>
             <div class="insight">
                 <h3>🧠 Sentinel Insight</h3>
-                <p>Die aktuelle Analyse von BTC zeigt ein gemischtes Bild, wobei die 1-Stunden-Chart bullish ist, die 4-Stunden-Chart neutral und die tägliche Chart bearish ist, was auf eine mögliche Umkehrung des Trends hindeutet. Der RSI-Wert von 48,4 deutet auf eine neutrale Positionierung hin, was bedeutet, dass der Kurs weder überkauft noch überverkauft ist. Es ist jedoch wichtig, die makroökonomischen Faktoren und die Gesamtmarktlage zu berücksichtigen, um eine fundierte Entscheidung über den Kauf oder Verkauf von BTC zu treffen.</p>
+                <p>Die aktuelle Analyse von BTC zeigt ein gemischtes Bild, wobei der 1-Stunden-Chart bullish ist, der 4-Stunden-Chart neutral und der 1-Tages-Chart bearish bleibt, was den makroökonomischen Trend widerspiegelt. Der RSI-Wert von 48,5 deutet darauf hin, dass der Kurs nicht überkauft oder überverkauft ist, was eine weitere Konsolidierung oder ein Ausbruch in beide Richtungen ermöglicht. Es ist jedoch wichtig, die Gesamtsituation kritisch zu betrachten und auf mögliche Trendwenden oder Breakouts zu achten, um eine erfolgreiche Handelsstrategie zu entwickeln.</p>
             </div>
             <div class="chart-box" id="tv-chart"></div>
         </div>

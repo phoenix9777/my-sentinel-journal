@@ -1,27 +1,29 @@
 
     <!DOCTYPE html>
-    <html>
+    <html lang="de">
     <head>
+        <meta charset="UTF-8">
         <title>Sentinel Intelligence - SOL</title>
         <style>
-            body { background: #0d1117; color: white; font-family: -apple-system, sans-serif; padding: 20px; }
+            body { background: #0d1117; color: white; font-family: -apple-system, sans-serif; padding: 20px; line-height: 1.6; }
             .container { max-width: 1000px; margin: auto; background: #161b22; padding: 30px; border-radius: 15px; border: 1px solid #30363d; }
             .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 20px; }
             .status { padding: 10px 20px; border-radius: 8px; font-weight: bold; }
-            .bullish { background: #238636; } .bearish { background: #da3633; }
+            .bullish { background: #238636; } .bearish { background: #da3633; } .neutral { background: #d29922; }
             .chart-box { margin-top: 30px; height: 600px; border-radius: 10px; overflow: hidden; border: 1px solid #30363d; }
             .insight { background: #0d1117; padding: 20px; border-radius: 10px; border-left: 4px solid #58a6ff; margin: 20px 0; }
+            h1, h3 { color: #58a6ff; }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
                 <h1>SOL/USD Analysis</h1>
-                <div class="status bearish">Bearish (Macro) 🔴</div>
+                <div class="status bearish">Bearish (Macro Trend) 🔴</div>
             </div>
             <div class="insight">
                 <h3>🧠 Sentinel Insight</h3>
-                <p>Die Analyse von SOL zeigt ein gemischtes Bild, wobei die 1-Stunden-Chart bullisch ist, die 4-Stunden-Chart neutral und die Tages-Chart bearisch tendiert. Der RSI-Wert von 48,8 deutet darauf hin, dass SOL weder überkauft noch überverkauft ist, was eine neutrale Bewertung unterstützt. Es ist jedoch wichtig, die makroökonomischen Faktoren und die Gesamtmarktlage zu berücksichtigen, um eine umfassende Einschätzung der SOL-Performance zu erhalten.</p>
+                <p>Die Analyse von SOL zeigt ein gemischtes Bild, wobei der 1-Stunden-Chart bullish ist, der 4-Stunden-Chart neutral und der 1-Tages-Chart bearish tendiert, was auf einen größeren Abwärtstrend hindeutet. Der RSI-Wert von 47,9 deutet auf eine neutrale bis leicht unterbewertete Position hin, was jedoch im Kontext des größeren Trends zu interpretieren ist. Es ist wichtig, diese Analyse kritisch zu betrachten und weitere Faktoren wie fundamentale Daten und Marktbedingungen zu berücksichtigen, um eine umfassende Einschätzung von SOL zu erhalten.</p>
             </div>
             <div class="chart-box" id="tv-chart"></div>
         </div>
