@@ -25,7 +25,7 @@ def get_analysis(symbol, data):
     User: kingley3370 | Zeit: {t}.
     Daten: Preis {data['usd']}$, Change {data['usd_24h_change']:.2f}%.
     
-    STRUKTUR (EXAKT SO EINHALTEN FÜR DISCORD):
+    STRUKTUR (EXAKT SO EINHALTEN):
     👑 {symbol.upper()} ({symbol.upper()}/USD) - [Kreativer Titel]
     
     [Einleitungssatz zur aktuellen Lage]
@@ -52,7 +52,7 @@ def get_analysis(symbol, data):
     }
     
     payload = {
-        "model": "llama3-70b-8192",
+        "model": "llama-3.3-70b-versatile",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7
     }
