@@ -3,36 +3,43 @@
     <html lang="de">
     <head>
         <meta charset="UTF-8">
-        <title>Sentinel Intelligence - BTC</title>
+        <title>KING VOLKAN ANALYZER - BTC</title>
         <style>
-            body { background: #0d1117; color: white; font-family: -apple-system, sans-serif; padding: 20px; line-height: 1.6; }
-            .container { max-width: 1000px; margin: auto; background: #161b22; padding: 30px; border-radius: 15px; border: 1px solid #30363d; }
-            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 20px; }
-            .status { padding: 10px 20px; border-radius: 8px; font-weight: bold; }
-            .bullish { background: #238636; } .bearish { background: #da3633; } .neutral { background: #d29922; }
-            .chart-box { margin-top: 30px; height: 600px; border-radius: 10px; overflow: hidden; border: 1px solid #30363d; }
-            .insight { background: #0d1117; padding: 20px; border-radius: 10px; border-left: 4px solid #58a6ff; margin: 20px 0; }
-            h1, h3 { color: #58a6ff; }
+            body { background: #0d1117; color: #c9d1d9; font-family: sans-serif; padding: 20px; }
+            .container { max-width: 900px; margin: auto; background: #161b22; padding: 30px; border-radius: 12px; border: 1px solid #30363d; }
+            h1 { color: #ffca28; border-bottom: 2px solid #ffca28; padding-bottom: 10px; }
+            .insight-box { white-space: pre-wrap; background: #0d1117; padding: 20px; border-radius: 8px; border-left: 5px solid #ffca28; }
+            .chart-box { margin-top: 20px; height: 600px; border-radius: 8px; overflow: hidden; }
         </style>
     </head>
     <body>
         <div class="container">
-            <div class="header">
-                <h1>BTC/USD Analysis</h1>
-                <div class="status bearish">Bearish (Macro Trend) 🔴</div>
-            </div>
-            <div class="insight">
-                <h3>🧠 Sentinel Insight</h3>
-                <p>Die aktuelle Analyse von BTC zeigt ein gemischtes Bild, wobei der 1-Stunden-Chart bullish ist, der 4-Stunden-Chart neutral und der 1-Tages-Chart bearish bleibt, was den makroökonomischen Trend widerspiegelt. Der RSI-Wert von 48,5 deutet darauf hin, dass der Kurs nicht überkauft oder überverkauft ist, was eine weitere Konsolidierung oder ein Ausbruch in beide Richtungen ermöglicht. Es ist jedoch wichtig, die Gesamtsituation kritisch zu betrachten und auf mögliche Trendwenden oder Breakouts zu achten, um eine erfolgreiche Handelsstrategie zu entwickeln.</p>
-            </div>
+            <h1>👑 KING VOLKAN ANALYZER - BTC/USD</h1>
+            <p><strong>Preis: 67686.07$</strong> | Macro: Bearish 🔴</p>
+            <div class="insight-box">🔎 **Allgemeine Einschätzung**
+Der aktuelle Kurs von Bitcoin (BTC) liegt bei 67686.07$, innerhalb eines 24-Stunden-Preisbereichs von 64960.31$ bis 68118.37$. Die Analyse der verschiedenen Zeitebenen zeigt ein gemischtes Bild: Auf der 1-Stunden-Ebene ist die Tendenz bullish 🟢, auf der 4-Stunden-Ebene neutral 🟠 und auf der Tages-Ebene bearish 🔴. Der Relative Strength Index (RSI) liegt bei 51,8, was darauf hindeutet, dass der Kurs weder überkauft noch überverkauft ist.
+
+📈 **Preislevels**
+Die wichtigsten Preislevels, die im Auge behalten werden sollten, sind:
+- **Unterstützung**: 64960.31$ (24-Stunden-Tief) und mögliche weitere Unterstützungen bei 64000$ und 62000$.
+- **Widerstand**: 68118.37$ (24-Stunden-Hoch) und mögliche weitere Widerstände bei 69000$ und 70000$.
+
+💡 **Trade-Idee**
+Basierend auf der aktuellen Analyse könnte eine mögliche Trade-Idee darin bestehen, auf eine Korrektur nach unten zu spekulieren, falls der Kurs die Unterstützung bei 64960.31$ nicht hält. Ein Long-Trade könnte in Betracht gezogen werden, wenn der Kurs die Widerstandslinie bei 68118.37$ durchbricht und sich darüber stabilisiert. Es ist jedoch wichtig, die Risiken zu managen und auf Änderungen in der Marktstruktur zu reagieren.
+
+🌌 **Erwartung (King Volkan AI)**
+Die künstliche Intelligenz von King Volkan könnte aufgrund der aktuellen Marktdaten und der Analyse der verschiedenen Zeitebenen folgende Erwartungen haben:
+- **Kurzfristig**: Eine Korrektur nach unten könnte eintreten, wenn der Kurs die Unterstützung bei 64960.31$ nicht hält, mit potenziellen Zielen bei 64000$ oder tiefer.
+- **Mittelfristig**: Ein Ausbruch über 68118.37$ könnte zu einer Rallye führen, mit potenziellen Zielen bei 69000$ oder höher.
+- **Langfristig**: Die Gesamtstruktur bleibt bearish 🔴 auf der Tages-Ebene, was darauf hindeutet, dass der Kurs langfristig unter Druck bleiben könnte, es sei denn, es gibt eine signifikante Änderung in der Marktdynamik.
+
+Es ist wichtig, dass Trader und Anleger ihre eigenen Analysen durchführen und auf Marktentwicklungen reagieren, da die Märkte sehr volatil sein können.</div>
             <div class="chart-box" id="tv-chart"></div>
         </div>
         <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
         <script type="text/javascript">
             new TradingView.widget({
-                "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "240",
-                "timezone": "Europe/Berlin", "theme": "dark", "style": "1", "locale": "de",
-                "enable_publishing": false, "allow_symbol_change": true, "container_id": "tv-chart"
+                "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "240", "theme": "dark", "style": "1", "locale": "de", "container_id": "tv-chart"
             });
         </script>
     </body>

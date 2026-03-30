@@ -3,36 +3,39 @@
     <html lang="de">
     <head>
         <meta charset="UTF-8">
-        <title>Sentinel Intelligence - SOL</title>
+        <title>KING VOLKAN ANALYZER - SOL</title>
         <style>
-            body { background: #0d1117; color: white; font-family: -apple-system, sans-serif; padding: 20px; line-height: 1.6; }
-            .container { max-width: 1000px; margin: auto; background: #161b22; padding: 30px; border-radius: 15px; border: 1px solid #30363d; }
-            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 20px; }
-            .status { padding: 10px 20px; border-radius: 8px; font-weight: bold; }
-            .bullish { background: #238636; } .bearish { background: #da3633; } .neutral { background: #d29922; }
-            .chart-box { margin-top: 30px; height: 600px; border-radius: 10px; overflow: hidden; border: 1px solid #30363d; }
-            .insight { background: #0d1117; padding: 20px; border-radius: 10px; border-left: 4px solid #58a6ff; margin: 20px 0; }
-            h1, h3 { color: #58a6ff; }
+            body { background: #0d1117; color: #c9d1d9; font-family: sans-serif; padding: 20px; }
+            .container { max-width: 900px; margin: auto; background: #161b22; padding: 30px; border-radius: 12px; border: 1px solid #30363d; }
+            h1 { color: #ffca28; border-bottom: 2px solid #ffca28; padding-bottom: 10px; }
+            .insight-box { white-space: pre-wrap; background: #0d1117; padding: 20px; border-radius: 8px; border-left: 5px solid #ffca28; }
+            .chart-box { margin-top: 20px; height: 600px; border-radius: 8px; overflow: hidden; }
         </style>
     </head>
     <body>
         <div class="container">
-            <div class="header">
-                <h1>SOL/USD Analysis</h1>
-                <div class="status bearish">Bearish (Macro Trend) 🔴</div>
-            </div>
-            <div class="insight">
-                <h3>🧠 Sentinel Insight</h3>
-                <p>Die Analyse von SOL zeigt ein gemischtes Bild, wobei der 1-Stunden-Chart bullish ist, der 4-Stunden-Chart neutral und der 1-Tages-Chart bearish tendiert, was auf einen größeren Abwärtstrend hindeutet. Der RSI-Wert von 47,9 deutet auf eine neutrale bis leicht unterbewertete Position hin, was jedoch im Kontext des größeren Trends zu interpretieren ist. Es ist wichtig, diese Analyse kritisch zu betrachten und weitere Faktoren wie fundamentale Daten und Marktbedingungen zu berücksichtigen, um eine umfassende Einschätzung von SOL zu erhalten.</p>
-            </div>
+            <h1>👑 KING VOLKAN ANALYZER - SOL/USD</h1>
+            <p><strong>Preis: 84.34$</strong> | Macro: Bearish 🔴</p>
+            <div class="insight-box">🔎 **Allgemeine Einschätzung**
+Der aktuelle Kurs von SOL liegt bei 84,34$, innerhalb eines 24-Stunden-Ranges von 79,03$ bis 84,92$. Die technische Analyse zeigt eine bullishe Tendenz im 1-Stunden-Chart 🟢, während der 4-Stunden-Chart neutral 🟠 ist und der Daily-Chart eine bearishe Tendenz 🔴 aufweist. Der RSI-Wert von 50,0 deutet auf eine neutrale Marktstimmung hin.
+
+📈 **Preislevels**
+Die wichtigsten Preislevels für SOL sind:
+- **Unterstützung**: 79,03$ (24-Stunden-Tief)
+- **Widerstand**: 84,92$ (24-Stunden-Hoch)
+- **Schlüssel-Level**: 82,00$ (potenzielle Unterstützung/Widerstandslinie)
+
+💡 **Trade-Idee**
+Basierend auf der Analyse könnte eine mögliche Trade-Idee darin bestehen, auf eine Aufwärtsbewegung zu spekulieren, wenn der Kurs die Unterstützung bei 79,03$ hält und sich über das Schlüssel-Level bei 82,00$ bewegt. Ein Stop-Loss könnte unter der Unterstützung bei 79,03$ gesetzt werden, während das Take-Profit-Ziel über dem Widerstand bei 84,92$ liegen könnte.
+
+🌌 **Erwartung (King Volkan AI)**
+Die künstliche Intelligenz von King Volkan prognostiziert, dass SOL in den nächsten Stunden und Tagen eine volatile Phase durchlaufen könnte, mit der Möglichkeit, sowohl bullishe als auch bearishe Bewegungen zu sehen. Es ist wichtig, die Marktbedingungen kontinuierlich zu überwachen und die Trading-Strategie entsprechend anzupassen. Die Erwartung ist, dass der Kurs von SOL innerhalb der nächsten 24 Stunden weiterhin zwischen 79,03$ und 84,92$ schwanken wird, mit der Möglichkeit, das obere Ende des Ranges zu testen, wenn die bullishe Tendenz im 1-Stunden-Chart bestätigt wird.</div>
             <div class="chart-box" id="tv-chart"></div>
         </div>
         <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
         <script type="text/javascript">
             new TradingView.widget({
-                "autosize": true, "symbol": "BINANCE:SOLUSDT", "interval": "240",
-                "timezone": "Europe/Berlin", "theme": "dark", "style": "1", "locale": "de",
-                "enable_publishing": false, "allow_symbol_change": true, "container_id": "tv-chart"
+                "autosize": true, "symbol": "BINANCE:SOLUSDT", "interval": "240", "theme": "dark", "style": "1", "locale": "de", "container_id": "tv-chart"
             });
         </script>
     </body>
