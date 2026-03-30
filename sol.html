@@ -1,0 +1,38 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Sentinel Intelligence - SOL</title>
+        <style>
+            body { background: #0d1117; color: white; font-family: -apple-system, sans-serif; padding: 20px; }
+            .container { max-width: 1000px; margin: auto; background: #161b22; padding: 30px; border-radius: 15px; border: 1px solid #30363d; }
+            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 20px; }
+            .status { padding: 10px 20px; border-radius: 8px; font-weight: bold; }
+            .bullish { background: #238636; } .bearish { background: #da3633; }
+            .chart-box { margin-top: 30px; height: 600px; border-radius: 10px; overflow: hidden; border: 1px solid #30363d; }
+            .insight { background: #0d1117; padding: 20px; border-radius: 10px; border-left: 4px solid #58a6ff; margin: 20px 0; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>SOL/USD Analysis</h1>
+                <div class="status bearish">Bearish (Macro) 🔴</div>
+            </div>
+            <div class="insight">
+                <h3>🧠 Sentinel Insight</h3>
+                <p>Die Analyse von SOL zeigt ein gemischtes Bild, wobei die 1-Stunden-Chart bullisch ist, die 4-Stunden-Chart neutral und die Tages-Chart bearisch tendiert. Der RSI-Wert von 48,8 deutet darauf hin, dass SOL weder überkauft noch überverkauft ist, was eine neutrale Bewertung unterstützt. Es ist jedoch wichtig, die makroökonomischen Faktoren und die Gesamtmarktlage zu berücksichtigen, um eine umfassende Einschätzung der SOL-Performance zu erhalten.</p>
+            </div>
+            <div class="chart-box" id="tv-chart"></div>
+        </div>
+        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+        <script type="text/javascript">
+            new TradingView.widget({
+                "autosize": true, "symbol": "BINANCE:SOLUSDT", "interval": "240",
+                "timezone": "Europe/Berlin", "theme": "dark", "style": "1", "locale": "de",
+                "enable_publishing": false, "allow_symbol_change": true, "container_id": "tv-chart"
+            });
+        </script>
+    </body>
+    </html>
+    
