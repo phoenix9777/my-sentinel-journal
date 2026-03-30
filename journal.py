@@ -3,81 +3,95 @@ from datetime import datetime, timedelta
 
 WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-ALPHA_VANTAGE_KEY = os.getenv("ALPHA_VANTAGE_KEY") # Kostenlos auf alphavantage.co
+ALPHA_VANTAGE_KEY = os.getenv("ALPHA_VANTAGE_KEY")
 
 def get_berlin_time():
     return (datetime.utcnow() + timedelta(hours=2)).strftime("%d.%m.%Y | %H:%M")
 
+def get_market_data():
+    try:
+        # Wir holen USD Preise UND den EUR Wechselkurs in einem Rutsch
+        url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,solana,sui,eur&vs_currencies=usd&include_24hr_change=true"
+        res = requests.get(url, timeout=10).json()
+        usd_eur = res['eur']['usd'] # Wie viel 1 EUR in USD wert ist
+        return res, usd_eur
+    except: return None, 1.09
+
 def get_sentiment():
-    """Holt den Fear & Greed Index (Psychologie)"""
     try:
         res = requests.get("https://api.alternative.me/fng/").json()
-        fng_val = res['data'][0]['value']
-        fng_class = res['data'][0]['value_classification']
-        return f"Fear & Greed Index: {fng_val} ({fng_class})"
-    except: return "Sentiment-Daten aktuell nicht verfügbar."
+        return f"{res['data'][0]['value']} ({res['data'][0]['value_classification']})"
+    except: return "N/A"
 
 def get_macro():
-    """Holt DXY (Dollar Index) via Alpha Vantage"""
     try:
         url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=DX-Y.NYB&apikey={ALPHA_VANTAGE_KEY}"
         res = requests.get(url).json()
-        quote = res.get("Global Quote", {})
-        change = quote.get("10. change percent", "0%")
-        return f"DXY Change: {change}"
-    except: return "DXY-Daten nicht verfügbar."
+        change = res.get("Global Quote", {}).get("10. change percent", "0%")
+        return change
+    except: return "0%"
 
-def get_analysis(symbol, data, fng, macro):
+def get_analysis(symbol, data, fng, macro, eur_rate):
     url = "https://api.groq.com/openai/v1/chat/completions"
     t = get_berlin_time()
     
-    # Institutioneller Prompt mit Makro-Logik
+    # Wir berechnen den Euro Preis direkt im Code, damit die KI nicht lügt
+    price_eur = round(data['usd'] / eur_rate, 2) if symbol != "BTC" else round(data['usd'] / eur_rate, 0)
+
     prompt = f"""
-    INSTITUTIONAL 4H ANALYSIS FOR {symbol.upper()}
-    Preis: {data['usd']}$ | 24h Change: {data['usd_24h_change']:.2f}%
-    Markt-Sentiment: {fng}
-    Makro-Status (DXY): {macro}
-
-    ANALYSE-LOGIK (WICHTIG):
-    1. Wenn DXY steigt (>0.1%): Sei bärisch/vorsichtig (Dollar-Stärke drückt Krypto).
-    2. Wenn F&G < 30 (Extreme Fear): Suche nach 'Long Sweeps' (Smart Money kauft Angst).
-    3. Wenn F&G > 70 (Greed): Achte auf 'Liquidity Traps' (Smart Money verkauft in Gier).
-
-    STRUKTUR (EXAKT):
-    👑 {symbol.upper()} - Institutional Risk Report
+    Schreibe eine PROFESSIONELLE MARKTANALYSE für {symbol.upper()}. 
+    Kein Gelaber, keine Einleitung, keine Erklärungen der Logik.
     
-    • 🏛️ **Makro- & Sentiment-Check:** [Analysiere DXY & Fear/Greed]
-    • 📊 **Markt-Check & SMC:** [Trend & SMC-Zonen]
-    • 🛑 **SENTINEL ENTSCHEIDUNG:** **[BIAS]** (KAUFEN/VERKAUFEN/ABWARTEN)
-    • ⚠️ **RISIKOWARNUNG:** [Explizite Warnung bei Makro-Gefahr]
+    DATEN:
+    Preis: {data['usd']}$ ({price_eur}€)
+    24h Change: {data['usd_24h_change']:.2f}%
+    Fear & Greed: {fng}
+    DXY Change: {macro}
+
+    STRUKTUR (STRENG EINHALTEN):
+    👑 {symbol.upper()} - Institutional Report ({t})
     
-    💶 **Preis in EURO:** ca. [Preis] €
+    🏛️ **Makro- & Sentiment-Status:**
+    • DXY: {macro} (Einfluss auf Krypto-Liquidity)
+    • Markt-Psychologie: {fng}
+    
+    📊 **Markt-Check & SMC:**
+    • Trend: [Kurze Einschätzung basierend auf 24h Change]
+    • SMC-Zonen: [Nenne realistische Support/Resistance Level basierend auf dem Preis]
+    
+    🛑 **SENTINEL ENTSCHEIDUNG:** **[KAUFEN, VERKAUFEN oder ABWARTEN]**
+    • **Begründung:** [Maximal 15 Wörter]
+    
+    ⚠️ **RISIKOWARNUNG:** [Ein Satz zur Gefahr bei DXY-Stärke oder Extreme Fear]
+    
+    💶 **Preis:** {price_eur} €
     """
     
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     payload = {
         "model": "llama-3.3-70b-versatile",
         "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.6
+        "temperature": 0.4 # Niedrige Temperature = Weniger Gelaber, mehr Fakten
     }
     
     try:
         res = requests.post(url, json=payload, headers=headers, timeout=30)
-        return res.json()['choices'][0]['message']['content'] if res.status_code == 200 else None
+        return res.json()['choices'][0]['message']['content']
     except: return None
 
 def send():
-    # 1. Daten sammeln
-    cg_data = requests.get("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,solana,sui&vs_currencies=usd&include_24hr_change=true").json()
+    cg_data, eur_rate = get_market_data()
+    if not cg_data: return
+    
     fng = get_sentiment()
     macro = get_macro()
     
     mapping = {"BTC": "bitcoin", "SOL": "solana", "SUI": "sui"}
     for sym, cg_id in mapping.items():
-        print(f"Verarbeite {sym}...")
-        text = get_analysis(sym, cg_data[cg_id], fng, macro)
+        print(f"Analyse {sym}...")
+        text = get_analysis(sym, cg_data[cg_id], fng, macro, eur_rate)
         if text:
-            requests.post(WEBHOOK, json={"username": f"Sentinel Elite | {sym}", "content": text[:1990]})
+            requests.post(WEBHOOK, json={"username": f"Sentinel Elite | {sym}", "content": text})
             time.sleep(2)
 
 if __name__ == "__main__":
