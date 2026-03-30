@@ -2,28 +2,36 @@ name: 4H Journal Autopilot
 
 on:
   schedule:
-    - cron: "0 */4 * * *" # Läuft alle 4 Stunden
+    - cron: "0 */4 * * *" # Läuft alle 4 Stunden (UTC)
   workflow_dispatch:      # Ermöglicht manuelles Starten
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:          # WICHTIG: Erlaubt GitHub Actions das Hochladen der Webseite
+      contents: write
     steps:
       - uses: actions/checkout@v4
       
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12' # Wichtig für pandas-ta
+          python-version: '3.12'
           
       - name: Install dependencies
         run: pip install requests pandas pandas-ta discord.py
         
-      - name: Journal senden
+      - name: Journal & HTML Report erstellen
         env:
-          # HIER müssen alle Keys gelistet sein:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           CRYPTOCOMPARE_KEY: ${{ secrets.CRYPTOCOMPARE_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
-        run: python journal.py
+        run: python journal.py # Führt das Script aus und erstellt btc.html, sol.html etc.
+
+      - name: Deploy Web Reports to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .       # Lädt alle Dateien im aktuellen Ordner hoch
+          publish_branch: gh-pages # Diese Dateien landen auf deiner Webseite
