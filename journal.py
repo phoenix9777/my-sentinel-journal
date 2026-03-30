@@ -19,7 +19,8 @@ def get_live_data(coin_id):
             "p": m['current_price']['usd'],
             "h": m['high_24h']['usd'],
             "l": m['low_24h']['usd'],
-            "c": m['price_change_percentage_24h']
+            "c": m['price_change_percentage_24h'],
+            "ath": m['ath']['usd']
         }
     except: return None
 
@@ -28,32 +29,34 @@ def get_crypto_analysis(symbol, s):
     t = get_berlin_time()
     
     prompt = f"""
-    Erstelle eine INSTITUTIONELLE 4H-Analyse für {symbol}/USD für kingley3370.
-    DATEN: Preis {s['p']}, 24H Range {s['l']} - {s['h']}, Change {s['c']}%.
+    Erstelle eine ELITE 4H-Analyse für {symbol}/USD für kingley3370 (Finora AI Style).
+    DATEN: Preis {s['p']} USD, 24H Range {s['l']} - {s['h']}, Change {s['c']}%, Allzeithoch {s['ath']}.
     
-    STRUKTUR (Finora AI Elite Style):
-    1. 🗓️ **Analyse vom {t}**
-       Begrüße kingley3370 kurz und direkt.
+    STRUKTUR (Halte dich exakt an dieses Layout):
     
-    2. 📊 **Allgemeine Einschätzung:**
-       - Lage zum Equilibrium (Mitte von {s['l']} und {s['h']}).
-       - Marktdynamik: Nutze 🔴/🟢 für Indikatoren (RSI, MACD, ADX).
+    🗓️ **Analyse vom {t}**
+    Begrüße kingley3370 kurz. {symbol} Analyse ist bereit.
     
-    3. 🛡️ **SMC & Technische Analyse:**
-       - Erwähne Liquiditäts-Sweeps, FVG-Gaps und Orderblocks (OB).
-       - Definiere die **Kauf-Zone (Demand)** und **Verkaufs-Zone (Supply)**.
+    📊 **Aktueller Zustand:**
+    - Beschreibe kurz die Lage (z.B. pendelt um Marke X, Momentum verlangsamt/beschleunigt).
     
-    4. 📍 **Key Levels (Support & Resistance):**
-       - Liste exakte Linien: 🟢 Support 1-3 | 🔴 Resistance 1-3.
+    📍 **Schlüsselwiderstände:**
+    - Liste 2-3 Zonen mit 🔴 auf (z.B. {s['h']} USD - Erkläre kurz die Bedeutung).
     
-    5. ⚡ **Trading-Setups:**
-       - Konkretes Szenario für Long & Short.
-       - Setze 🎯 Entry, 🛑 Stop-Loss und 💰 Take-Profit.
+    📍 **Schlüsselunterstützungen:**
+    - Liste 2-3 Zonen mit 🟢 auf (z.B. {s['l']} USD - Erkläre kurz die Bedeutung).
     
-    6. 🎯 **Sentinel Erwartung:**
-       - Dein Favorit-Szenario. Disclaimer am Ende.
+    ⚡ **Szenarien (Der Plan):**
+    - **Bullisch 🚀**: Beschreibe die Bedingung für eine Rallye (z.B. Bruch von Widerstand X) und das Ziel (z.B. Richtung ATH {s['ath']}).
+    - **Bärisch 🐻**: Beschreibe das Risiko (z.B. Rückfall unter Support Y) und das Ziel bei Abverkauf.
     
-    WICHTIG: Sei extrem detailliert, nutze Markdown und Emojis.
+    🛡️ **SMC & Indikatoren:**
+    - Kurze Analyse zu RSI und MACD (🔴/🟢). Erwähne FVG oder Liquiditäts-Sweeps.
+    
+    🎯 **Sentinel Erwartung:**
+    - Dein Favorit für die nächsten 4-12 Stunden. Disclaimer am Ende.
+    
+    WICHTIG: Sei präzise mit Zahlen, nutze Markdown und Emojis. Trenne die Sektionen sauber.
     """
     
     try:
@@ -68,7 +71,6 @@ def send_to_discord():
         if stats:
             text = get_crypto_analysis(sym, stats)
             if text:
-                # Wir senden pro Coin eine eigene Nachricht -> Kein Abbruch mehr!
                 payload = {
                     "username": f"Sentinel Elite | {sym}",
                     "avatar_url": "https://i.imgur.com/8N7j5fX.png",
@@ -76,7 +78,7 @@ def send_to_discord():
                 }
                 requests.post(WEBHOOK, json=payload)
                 print(f"✅ {sym} gesendet.")
-        time.sleep(10) # Schutz vor Discord Rate-Limit
+        time.sleep(12)
 
 if __name__ == "__main__":
     send_to_discord()
