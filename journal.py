@@ -11,19 +11,26 @@ def get_berlin_time():
 
 def get_binance_data(symbol):
     try:
-        # 24h Ticker Daten von Binance
-        url = f"https://api.binance.com/api/v3/ticker/24hr?symbol={symbol}USDT"
-        res = requests.get(url, timeout=10)
+        # Wir nutzen den absolut stabilsten Endpunkt (Symbol Price Ticker)
+        url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}USDT"
+        res = requests.get(url, timeout=15)
         data = res.json()
         
-        return {
-            "p": float(data['lastPrice']),
-            "h": float(data['highPrice']),
-            "l": float(data['lowPrice']),
-            "c": float(data['priceChangePercent'])
-        }
+        if 'price' in data:
+            price = float(data['price'])
+            # Da dieser Endpunkt kein High/Low liefert, schätzen wir die Range 
+            # für die KI (oder lassen sie weg), um den API-Call extrem stabil zu halten.
+            return {
+                "p": price,
+                "h": round(price * 1.02, 2), # Dummy High für die Analyse
+                "l": round(price * 0.98, 2), # Dummy Low für die Analyse
+                "c": "Stabil"
+            }
+        else:
+            print(f"⚠️ Unerwartete Antwort von Binance für {symbol}: {data}")
+            return None
     except Exception as e:
-        print(f"❌ Binance Fehler bei {symbol}: {e}")
+        print(f"❌ Schwerer Fehler bei {symbol}: {e}")
         return None
 
 def get_crypto_analysis(symbol, s):
@@ -32,24 +39,24 @@ def get_crypto_analysis(symbol, s):
     
     prompt = f"""
     Schreibe eine ELITE 4H-Analyse für {symbol}/USDT (Finora AI Style).
-    Daten: Preis {s['p']}, High {s['h']}, Low {s['l']}, Change {s['c']}%.
+    Daten: Aktueller Preis {s['p']} USDT.
     
-    Layout:
+    STRUKTUR:
     1. 🗓️ **Analyse vom {t}**
+       Begrüße kingley3370.
     2. 📊 **Allgemeine Einschätzung & SMC:** (Zonen 🟢/🔴, FVG, Sweeps)
     3. ⚡ **Szenarien:** Bullisch 🚀 & Bärisch 🐻.
     4. 🛑 **Empfehlung:** KAUFEN, VERKAUFEN oder ABWARTEN?
     
-    Nenne den Preis in EURO. Kurz und knackig!
+    Zusatz: Nenne den Preis in EURO. Kurz und knackig!
     """
     
     try:
-        res = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=40)
+        res = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=60)
         return res.json()['candidates'][0]['content']['parts'][0]['text']
     except: return None
 
 def send_to_discord():
-    # Binance nutzt Symbole wie BTC, SOL, SUI
     coins = ["BTC", "SOL", "SUI"]
     for sym in coins:
         print(f"--- Verarbeite {sym} ---")
@@ -57,11 +64,13 @@ def send_to_discord():
         if stats:
             text = get_crypto_analysis(sym, stats)
             if text:
-                requests.post(WEBHOOK, json={"username": f"Sentinel Elite | {sym}", "content": text[:1990]})
-                print(f"🚀 {sym} erfolgreich gesendet!")
-        
-        # Nur 5 Sekunden Pause, Binance ist schnell!
+                res = requests.post(WEBHOOK, json={"username": f"Sentinel Elite | {sym}", "content": text[:1990]})
+                if res.status_code in [200, 204]:
+                    print(f"🚀 {sym} erfolgreich gesendet!")
+                else:
+                    print(f"❌ Discord Fehler: {res.status_code}")
         time.sleep(5)
 
 if __name__ == "__main__":
     send_to_discord()
+q
