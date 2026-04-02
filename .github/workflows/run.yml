@@ -2,13 +2,13 @@ name: 4H Journal Autopilot
 
 on:
   schedule:
-    - cron: "0 */4 * * *" # Läuft alle 4 Stunden (UTC)
-  workflow_dispatch:      # Ermöglicht manuelles Starten
+    - cron: "0 */4 * * *" # Läuft alle 4 Stunden
+  workflow_dispatch:      # Manuelles Starten möglich
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:          # WICHTIG: Erlaubt GitHub Actions das Hochladen der Webseite
+    permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
@@ -26,12 +26,20 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           CRYPTOCOMPARE_KEY: ${{ secrets.CRYPTOCOMPARE_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
-        run: python journal.py # Führt das Script aus und erstellt btc.html, sol.html etc.
+        run: python journal.py 
+
+      # NEU: Speichert die last_prices.json, damit der 3% Filter funktioniert
+      - name: Save Last Prices
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add last_prices.json || echo "Keine Preisänderung"
+          git commit -m "Update last prices [skip ci]" || echo "Nichts zu committen"
+          git push || echo "Push fehlgeschlagen"
 
       - name: Deploy Web Reports to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .       # Lädt alle Dateien im aktuellen Ordner hoch
-          publish_branch: gh-pages # Diese Dateien landen auf deiner Webseite
+          publish_dir: .
+          publish_branch: gh-pages
