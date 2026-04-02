@@ -1,4 +1,4 @@
-name: 4H Journal Autopilot
+Name: 4H Journal Autopilot
 
 on:
   schedule:
@@ -11,8 +11,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Holt die gesamte Historie für sauberes Committen
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -28,18 +31,18 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python journal.py 
 
-      # NEU: Speichert die last_prices.json, damit der 3% Filter funktioniert
-      - name: Save Last Prices
+      # Speichert die last_prices.json & index.html, damit alles aktuell bleibt
+      - name: Save Data & History
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add last_prices.json || echo "Keine Preisänderung"
-          git commit -m "Update last prices [skip ci]" || echo "Nichts zu committen"
-          git push || echo "Push fehlgeschlagen"
+          git add last_prices.json index.html *.html || echo "Keine neuen Daten"
+          git commit -m "Update Journal & Prices [skip ci]" || echo "Nichts zu committen"
+          git push origin main || echo "Push auf Main fehlgeschlagen"
 
       - name: Deploy Web Reports to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
-          publish_branch: gh-pages
+          publish_branch: gh-pages 
