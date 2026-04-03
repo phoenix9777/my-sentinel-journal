@@ -1,4 +1,4 @@
-Name: 4H Journal Autopilot
+name: 4H Journal Autopilot
 
 on:
   schedule:
