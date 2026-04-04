@@ -184,7 +184,7 @@ def generate_index_page(coins):
 if __name__ == "__main__":
     GITHUB_USER = "phoenix9777" 
     REPO_NAME = "my-sentinel-journal"
-    COINS = ["BTC", "SOL", "SUI", "FET", "INJ"]
+    COINS = ["BTC", "SOL", "SUI", "ETH"]
     
     generate_index_page(COINS)
 
