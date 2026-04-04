@@ -50,21 +50,43 @@ def analyze_coin(symbol):
     tfs = {"1h": ("hour", 100), "4h": ("hour", 400), "1d": ("day", 250)}
     mtf_results = {}
     
-    for label, (api_tf, limit) in tfs.items():
+   for label, (api_tf, limit) in tfs.items():
         df = fetch_ohlcv(symbol, limit, api_tf)
-        if df is not None:
+        if df is not None and len(df) > 0:
             # Spezielle 4h-Aggregierung für CryptoCompare
             if label == "4h":
                 df = df.set_index('time').resample('4h').agg({'open':'first','high':'max','low':'min','close':'last','volumeto':'sum'}).dropna().reset_index()
             
             lp = df['close'].iloc[-1]
+            
+            # Indikatoren berechnen
             df.ta.rsi(length=14, append=True)
             df.ta.ema(length=200, append=True)
             
+            # --- SAFETY CHECK START ---
+            # Wir prüfen, ob die Spalten wirklich existieren, bevor wir darauf zugreifen
+            ema_col = "EMA_200"
+            rsi_col = "RSI_14"
+            
+            # Trend bestimmen (mit Fallback, falls EMA200 nicht berechnet werden konnte)
+            if ema_col in df.columns:
+                trend_val = "Bullish 🟢" if lp > df[ema_col].iloc[-1] else "Bearish 🔴"
+            else:
+                # Fallback: Wenn EMA200 fehlt, nehmen wir den EMA50 oder eine neutrale Meldung
+                df.ta.ema(length=50, append=True)
+                if "EMA_50" in df.columns:
+                    trend_val = "Bullish (Short-Term) 🟢" if lp > df["EMA_50"].iloc[-1] else "Bearish (Short-Term) 🔴"
+                else:
+                    trend_val = "Seitwärts/Neutral ⚪"
+            
+            # RSI bestimmen (mit Fallback auf 50.0)
+            rsi_val = round(df[rsi_col].iloc[-1], 1) if rsi_col in df.columns else 50.0
+            # --- SAFETY CHECK ENDE ---
+            
             mtf_results[label] = {
                 "p": lp,
-                "rsi": round(df['RSI_14'].iloc[-1], 1),
-                "trend": "Bullish 🟢" if lp > df['EMA_200'].iloc[-1] else "Bearish 🔴"
+                "rsi": rsi_val,
+                "trend": trend_val
             }
 
     # Basisdaten für die Analyse (4H als Standard)
