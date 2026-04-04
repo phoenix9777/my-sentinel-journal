@@ -2,53 +2,91 @@
     <!DOCTYPE html>
     <html lang="de">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>KING VOLKAN ANALYZER - SUI</title>
+        <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>KING VOLKAN TERMINAL - SUI</title>
         <style>
-            body { background: #0d1117; color: #c9d1d9; font-family: sans-serif; padding: 15px; line-height: 1.6; }
-            .container { max-width: 900px; margin: auto; background: #161b22; padding: 25px; border-radius: 12px; border: 1px solid #30363d; }
+            body { background: #0d1117; color: #c9d1d9; font-family: sans-serif; padding: 15px; }
+            .container { max-width: 1000px; margin: auto; background: #161b22; padding: 25px; border-radius: 12px; border: 1px solid #30363d; }
             h1 { color: #ffca28; border-bottom: 2px solid #ffca28; padding-bottom: 10px; }
+            .tf-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
+            .stat-card { background: #0d1117; padding: 15px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }
             .insight-box { white-space: pre-wrap; background: #0d1117; padding: 20px; border-radius: 8px; border-left: 5px solid #ffca28; margin-top: 20px; }
-            .chart-box { height: 600px; margin-top: 20px; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; }
+            .chart-controls { margin: 20px 0 10px 0; text-align: right; }
+            .btn { background: #30363d; color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; margin-left: 5px; font-weight: bold; }
+            .btn:hover { background: #ffca28; color: black; }
+            .chart-box { height: 600px; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; }
             a { color: #58a6ff; text-decoration: none; }
         </style>
     </head>
     <body>
         <div class="container">
             <a href="index.html">← Zurück zum Dashboard</a>
-            <h1>👑 KING VOLKAN ANALYZER | SUI/USD</h1>
-            <p><strong>Macro-Trend: Bearish (Macro Trend) 🔴</strong> | Live-Preis: 0.8712$</p>
-            <div class="insight-box">🔎 **Allgemeine Einschätzung:**
-Die aktuelle Marktsituation für SUI/USD zeigt einen Preis von 0,8712$, innerhalb eines 24-Stunden-Ranges von 0,8569$ bis 0,8845$. Das Mittel dieses Ranges liegt bei 0,87$, was auch als wichtiger Preis für die aktuelle Marktentwicklung angesehen werden kann. Der Relative Strength Index (RSI) liegt bei 48,7, was auf eine neutrale bis leicht bearische Tendenz hindeutet. Der Macro-Trend ist jedoch bearisch 🔴, was bedeutet, dass die übergeordnete Richtung nach unten zeigt.
+            <h1>👑 KING VOLKAN TERMINAL | SUI/USD</h1>
+            
+            <div class="tf-stats">
+                <div class="stat-card"><strong>1H</strong><br>Bullish (Short-Term) 🟢<br>RSI: 50.6</div>
+                <div class="stat-card"><strong>4H</strong><br>Bearish (Short-Term) 🔴<br>RSI: 48.9</div>
+                <div class="stat-card"><strong>1D</strong><br>Bearish 🔴<br>RSI: 41.7</div>
+            </div>
 
-Der Moving Average Convergence Divergence (MACD) zeigt eine leicht bearische Tendenz, da die Signal-Linie über der MACD-Linie liegt. Der Average True Range (ATR) liegt bei etwa 0,014$, was auf eine moderate Volatilität hinweist. Die Kombination aus RSI, MACD und ATR deutet darauf hin, dass der Markt in einer Phase der Konsolidierung ist, bevor er möglicherweise wieder in die bestehende Trendrichtung einschwenkt.
+            <p><strong>Aktueller Preis: 0.8716 $</strong></p>
+            <div class="insight-box">🔎 **Allgemeine Einschätzung:**
+Die aktuelle Marktsituation für SUI/USD zeigt ein komplexes Bild 🌌. Der Preis von 0.8716$ befindet sich innerhalb eines engen 24-Stunden-Ranges zwischen 0.8569$ und 0.8845$, mit einem Mittelwert von 0.87$. Der Relative Strength Index (RSI) liegt bei 48,9, was auf eine leicht bearische Tendenz 🔴 hinweist. Es ist jedoch wichtig zu beachten, dass der RSI-Wert noch nicht im überverkauften Bereich liegt, was darauf hindeutet, dass der Markt noch nicht übermäßig bearisch ist 📊.
+
+Die Multi-Timeframe-Analyse zeigt ein interessantes Bild 🕰️. Auf dem 1-Stunden-Chart ist der Trend bullish 🟢, mit einem RSI-Wert von 50,6, was auf eine kurzfristige Aufwärtsbewegung hindeutet. Auf dem 4-Stunden-Chart ist der Trend jedoch bearisch 🔴, mit einem RSI-Wert von 48,9, was auf eine kurzfristige Abwärtsbewegung hindeutet. Der 1-Tages-Chart bestätigt die bearische Tendenz 🔴, mit einem RSI-Wert von 41,7, was auf eine längerfristige Abwärtsbewegung hindeutet.
+
+Insgesamt zeigt die allgemeine Einschätzung, dass der Markt in einer Übergangsphase ist 🔄, in der die Bullen und Bären um die Vorherrschaft kämpfen 🏆. Es ist wichtig, die Preisbewegungen und die Indikatoren genau zu beobachten, um die richtigen Entscheidungen zu treffen 📊.
 
 📈 **Wichtige Preislevels:**
-- **Support:** 0,8569$ (Untergrenze des 24-Stunden-Ranges), 0,848$ (weiterer Support, der durch historische Preisbewegungen bestätigt wurde)
-- **Resistance:** 0,8845$ (Obergrenze des 24-Stunden-Ranges), 0,892$ (weiterer Widerstand, der durch die jüngste Preisaktion bestätigt wurde)
-- **FVG-Zonen (Fair Value Gap):** Zwischen 0,8569$ und 0,8712$ könnte eine FVG-Zone liegen, da dieser Bereich in der Vergangenheit als wichtiger Preisbereich für die Marktteilnehmer diente.
-- **Liquiditäts-Pools:** Es gibt Hinweise auf Liquiditäts-Pools um die 0,8569$ und 0,8845$, da diese Preise in der Vergangenheit als wichtige Umkehrpunkte fungierten.
+Die wichtigsten Preislevels für SUI/USD sind:
+* **Support:** 0.8569$ (Untergrenze des 24-Stunden-Ranges) 🛡️
+* **Resistance:** 0.8845$ (Obergrenze des 24-Stunden-Ranges) 🚫
+* **FVG-Zone (Fair Value Gap):** 0.87$ - 0.875$ (Mittelwert des 24-Stunden-Ranges) 📊
+* **Unterstützungszone:** 0.85$ - 0.855$ (historische Unterstützungszone) 🛡️
+* **Widerstandszone:** 0.89$ - 0.895$ (historische Widerstandszone) 🚫
 
 💡 **Trade-Idee & Setup:**
-- **Long-Szenario:** Ein Einstieg auf der Long-Seite könnte in Betracht gezogen werden, wenn der Preis die 0,8845$-Marke überwindet, mit dem Ziel, die 0,892$-Marke zu erreichen. Ein Stop-Loss könnte unter der 0,8569$-Marke platziert werden.
-- **Short-Szenario:** Ein Einstieg auf der Short-Seite könnte in Betracht gezogen werden, wenn der Preis unter die 0,8569$-Marke fällt, mit dem Ziel, die 0,848$-Marke zu erreichen. Ein Stop-Loss könnte über der 0,8845$-Marke platziert werden.
-- **Manipulation/Sweep:** Ein möglicher Sweep unter 0,8569$ oder über 0,8845$ könnte als Signal für einen Trendwechsel dienen. Dies könnte durch eine plötzliche und starke Preisbewegung in eine Richtung gekennzeichnet sein, gefolgt von einer Rückkehr in den vorherigen Preisbereich.
+Eine mögliche Trade-Idee ist, auf eine Rückkehr zum Mittelwert des 24-Stunden-Ranges zu spekulieren 🔄. Wenn der Preis unter 0.8569$ fällt, könnte ein Long-Szenario in Betracht gezogen werden 🚀. Wenn der Preis über 0.8845$ steigt, könnte ein Short-Szenario in Betracht gezogen werden 🛸.
+
+Ein möglicher Setup für ein Long-Szenario wäre:
+* **Einstieg:** 0.8569$ (Untergrenze des 24-Stunden-Ranges) 🛡️
+* **Stop-Loss:** 0.85$ (Unterstützungszone) 🛡️
+* **Take-Profit:** 0.87$ (Mittelwert des 24-Stunden-Ranges) 📊
+
+Ein möglicher Setup für ein Short-Szenario wäre:
+* **Einstieg:** 0.8845$ (Obergrenze des 24-Stunden-Ranges) 🚫
+* **Stop-Loss:** 0.89$ (Widerstandszone) 🚫
+* **Take-Profit:** 0.87$ (Mittelwert des 24-Stunden-Ranges) 📊
 
 📚 **Beispiel für einen Einstieg:**
-- **Szenario 1 (Long):** Wenn der Preis auf 0,878$ steigt und dann auf 0,872$ zurückfällt, könnte ein Einstieg auf der Long-Seite in Betracht gezogen werden, wenn der Preis wieder über 0,878$ steigt, mit dem Ziel, die 0,892$-Marke zu erreichen. Ein Bestätigungsmuster könnte ein Hammer-Chartmuster bei 0,872$ sein.
-- **Szenario 2 (Short):** Wenn der Preis auf 0,862$ fällt und dann auf 0,868$ steigt, könnte ein Einstieg auf der Short-Seite in Betracht gezogen werden, wenn der Preis wieder unter 0,862$ fällt, mit dem Ziel, die 0,848$-Marke zu erreichen. Ein Bestätigungsmuster könnte ein Shooting-Star-Chartmuster bei 0,868$ sein.
+Ein Beispiel für einen Einstieg in ein Long-Szenario wäre:
+* **Szenario 1:** Der Preis fällt unter 0.8569$ und bildet ein Tief bei 0.855$. Der Trader kauft SUI/USD bei 0.8569$ und setzt den Stop-Loss bei 0.85$. Der Take-Profit wird bei 0.87$ gesetzt 📊.
+* **Szenario 2:** Der Preis steigt über 0.8845$ und bildet ein Hoch bei 0.885$. Der Trader verkauft SUI/USD bei 0.8845$ und setzt den Stop-Loss bei 0.89$. Der Take-Profit wird bei 0.87$ gesetzt 📊.
 
 🌌 **Meine Erwartung (King Volkan AI):**
-Basierend auf der aktuellen Marktsituation und den technischen Indikatoren erwarte ich, dass der Preis von SUI/USD in den nächsten Tagen weiter in der bestehenden Range von 0,8569$ bis 0,8845$ schwanken wird. Es besteht jedoch das Risiko, dass der Preis die untere Grenze der Range durchbricht und auf 0,848$ fällt, was zu einer weiteren Korrektur führen könnte. Die Volatilität bleibt moderat, und die Marktteilnehmer sollten auf Anzeichen eines Trendwechsels achten. 🔴 Die bearische Tendenz im Macro-Trend ist ein wichtiger Faktor, der bei der Entscheidungsfindung berücksichtigt werden sollte.</div>
+Meine Erwartung ist, dass der Preis von SUI/USD in den nächsten Tagen weiterhin innerhalb des 24-Stunden-Ranges schwankt 🌊. Es ist jedoch möglich, dass der Preis unter 0.8569$ fällt und ein Long-Szenario ausgelöst wird 🚀. Ich erwarte, dass der Preis in den nächsten Wochen weiterhin bearisch bleibt 🔴, aber es ist wichtig, die Preisbewegungen und die Indikatoren genau zu beobachten, um die richtigen Entscheidungen zu treffen 📊.</div>
+
+            <div class="chart-controls">
+                <button class="btn" onclick="changeChart('60')">1H Chart</button>
+                <button class="btn" onclick="changeChart('240')">4H Chart</button>
+                <button class="btn" onclick="changeChart('D')">1D Chart</button>
+            </div>
+            
             <div class="chart-box" id="tv-chart"></div>
         </div>
+
         <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
         <script type="text/javascript">
-            new TradingView.widget({
-                "autosize": true, "symbol": "BINANCE:SUIUSDT", "interval": "240", "theme": "dark", "style": "1", "locale": "de", "container_id": "tv-chart"
-            });
+            let currentSymbol = "BINANCE:SUIUSDT";
+            function renderChart(interval) {
+                new TradingView.widget({
+                    "autosize": true, "symbol": currentSymbol, "interval": interval,
+                    "timezone": "Europe/Berlin", "theme": "dark", "style": "1",
+                    "locale": "de", "container_id": "tv-chart"
+                });
+            }
+            function changeChart(tf) { renderChart(tf); }
+            renderChart('240');
         </script>
-    </body>
-    </html>
+    </body></html>
     

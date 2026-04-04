@@ -20,16 +20,18 @@ def get_ai_content(symbol, d, mode="web"):
     url = "https://api.groq.com/openai/v1/chat/completions"
     
     if mode == "web":
+        # KI sieht jetzt die MTF-Zusammenfassung für den Deep-Dive
         prompt = f"""
         ERSTELLE EINE MAXIMAL AUSFÜHRLICHE SMC-ANALYSE FÜR {symbol}/USD.
         Daten: Preis {d['p']}$, 24h Range: {d['l24']}$ - {d['h24']}$ (Mid: {d['mid']}$), RSI: {d['rsi']:.1f}, Bias: {d['b1d']}.
+        Multi-Timeframe Status: {d.get('mtf_summary', 'Nicht verfügbar')}
         
         HALTE DICH STRENG AN DIESE STRUKTUR UND SCHREIBE VIEL TEXT:
-        🔎 Allgemeine Einschätzung: (Detaillierte Analyse von Trend, Equilibrium und Indikatoren wie MACD/RSI/ATR)
-        📈 Wichtige Preislevels: (Exakte Preise für Support, Resistance, FVG-Zonen und Liquiditäts-Pools)
-        💡 Trade-Idee & Setup: (Entwirf ein Long- und ein Short-Szenario inkl. Manipulation/Sweep unter {d['l24']}$ oder über {d['h24']}$)
-        📚 Beispiel für einen Einstieg: (Detaillierte Szenarien 1 & 2 mit Bestätigungsmustern)
-        🌌 Meine Erwartung (King Volkan AI): (Deine persönliche Prognose & Risiko-Einschätzung)
+        🔎 Allgemeine Einschätzung: (Detaillierte Analyse von Trend, Equilibrium und Indikatoren)
+        📈 Wichtige Preislevels: (Exakte Preise für Support, Resistance, FVG-Zonen)
+        💡 Trade-Idee & Setup: (Long/Short Szenario inkl. Manipulation/Sweep unter {d['l24']}$ oder über {d['h24']}$)
+        📚 Beispiel für einen Einstieg: (Detaillierte Szenarien 1 & 2)
+        🌌 Meine Erwartung (King Volkan AI): (Deine persönliche Prognose)
 
         Schreibe wie ein Senior Analyst für einen Hedgefonds. Nutze Emojis. Deutsch.
         """
@@ -44,28 +46,70 @@ def get_ai_content(symbol, d, mode="web"):
     except: return "KI-Fehler."
 
 def analyze_coin(symbol):
-    df_1h = fetch_ohlcv(symbol, 400, "hour")
-    df_1d = fetch_ohlcv(symbol, 250, "day")
-    if df_1h is None or df_1d is None: return None
+    # MTF-Daten sammeln
+    tfs = {"1h": ("hour", 100), "4h": ("hour", 400), "1d": ("day", 250)}
+    mtf_results = {}
+    
+    for label, (api_tf, limit) in tfs.items():
+        df = fetch_ohlcv(symbol, limit, api_tf)
+        if df is not None and len(df) > 0:
+            # Spezielle 4h-Aggregierung für CryptoCompare
+            if label == "4h":
+                df = df.set_index('time').resample('4h').agg({'open':'first','high':'max','low':'min','close':'last','volumeto':'sum'}).dropna().reset_index()
+            
+            lp = df['close'].iloc[-1]
+            
+            # Indikatoren berechnen
+            df.ta.rsi(length=14, append=True)
+            df.ta.ema(length=200, append=True)
+            
+            # --- SAFETY CHECK START ---
+            # Wir prüfen, ob die Spalten wirklich existieren, bevor wir darauf zugreifen
+            ema_col = "EMA_200"
+            rsi_col = "RSI_14"
+            
+            # Trend bestimmen (mit Fallback, falls EMA200 nicht berechnet werden konnte)
+            if ema_col in df.columns:
+                trend_val = "Bullish 🟢" if lp > df[ema_col].iloc[-1] else "Bearish 🔴"
+            else:
+                # Fallback: Wenn EMA200 fehlt, nehmen wir den EMA50 oder eine neutrale Meldung
+                df.ta.ema(length=50, append=True)
+                if "EMA_50" in df.columns:
+                    trend_val = "Bullish (Short-Term) 🟢" if lp > df["EMA_50"].iloc[-1] else "Bearish (Short-Term) 🔴"
+                else:
+                    trend_val = "Seitwärts/Neutral ⚪"
+            
+            # RSI bestimmen (mit Fallback auf 50.0)
+            rsi_val = round(df[rsi_col].iloc[-1], 1) if rsi_col in df.columns else 50.0
+            # --- SAFETY CHECK ENDE ---
+            
+            mtf_results[label] = {
+                "p": lp,
+                "rsi": rsi_val,
+                "trend": trend_val
+            }
 
-    last_p = df_1h['close'].iloc[-1]
-    h24, l24 = df_1h['high'].iloc[-24:].max(), df_1h['low'].iloc[-24:].min()
+    # Basisdaten für die Analyse (4H als Standard)
+    main_df = fetch_ohlcv(symbol, 400, "hour")
+    if main_df is None or "1d" not in mtf_results: return None
+
+    last_p = main_df['close'].iloc[-1]
+    h24, l24 = main_df['high'].iloc[-24:].max(), main_df['low'].iloc[-24:].min()
     mid = round((h24 + l24) / 2, 2)
     
-    atr_df = df_1h.ta.atr(length=14)
-    atr = atr_df.iloc[-1] if atr_df is not None else 0
+    # Support/Res Logik
+    avg_v = fetch_ohlcv(symbol, 250, "day")['volumeto'].mean()
+    supp = sorted([round(r['low'], 2) for _, r in fetch_ohlcv(symbol, 250, "day").iterrows() if (last_p * 0.88 < r['low'] < last_p) and r['volumeto'] > avg_v * 1.3], reverse=True)[:3]
+    res_l = sorted([round(r['high'], 2) for _, r in fetch_ohlcv(symbol, 250, "day").iterrows() if (last_p < r['high'] < last_p * 1.12) and r['volumeto'] > avg_v * 1.3])[:3]
 
-    df_1d.ta.ema(length=200, append=True)
-    b1d = "Bullish (Macro) 🟢" if last_p > df_1d['EMA_200'].iloc[-1] else "Bearish (Macro Trend) 🔴"
+    mtf_summary = f"1H: {mtf_results['1h']['trend']} (RSI {mtf_results['1h']['rsi']}), 4H: {mtf_results['4h']['trend']} (RSI {mtf_results['4h']['rsi']}), 1D: {mtf_results['1d']['trend']} (RSI {mtf_results['1d']['rsi']})"
 
-    df_4h = df_1h.set_index('time').resample('4h').agg({'open':'first','high':'max','low':'min','close':'last','volumeto':'sum'}).dropna().reset_index()
-    df_4h.ta.rsi(length=14, append=True); rsi = df_4h['RSI_14'].iloc[-1]
+    data = {
+        "p": last_p, "h24": h24, "l24": l24, "mid": mid, "b1d": mtf_results['1d']['trend'], 
+        "rsi": mtf_results['4h']['rsi'], "supp": supp, "res": res_l, 
+        "mtf": mtf_results, "mtf_summary": mtf_summary
+    }
     
-    avg_v = df_1d['volumeto'].mean()
-    supp = sorted([round(r['low'], 2) for _, r in df_1d.iterrows() if (last_p * 0.88 < r['low'] < last_p) and r['volumeto'] > avg_v * 1.3], reverse=True)[:3]
-    res_l = sorted([round(r['high'], 2) for _, r in df_1d.iterrows() if (last_p < r['high'] < last_p * 1.12) and r['volumeto'] > avg_v * 1.3])[:3]
-
-    data = {"p": last_p, "h24": h24, "l24": l24, "mid": mid, "b1d": b1d, "rsi": rsi, "atr": atr, "supp": supp, "res": res_l}
     data["full_insight"] = get_ai_content(symbol, data, mode="web")
     data["short_insight"] = get_ai_content(symbol, data, mode="short")
     return data
@@ -75,34 +119,59 @@ def generate_html_report(symbol, d):
     <!DOCTYPE html>
     <html lang="de">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>KING VOLKAN ANALYZER - {symbol}</title>
+        <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>KING VOLKAN TERMINAL - {symbol}</title>
         <style>
-            body {{ background: #0d1117; color: #c9d1d9; font-family: sans-serif; padding: 15px; line-height: 1.6; }}
-            .container {{ max-width: 900px; margin: auto; background: #161b22; padding: 25px; border-radius: 12px; border: 1px solid #30363d; }}
+            body {{ background: #0d1117; color: #c9d1d9; font-family: sans-serif; padding: 15px; }}
+            .container {{ max-width: 1000px; margin: auto; background: #161b22; padding: 25px; border-radius: 12px; border: 1px solid #30363d; }}
             h1 {{ color: #ffca28; border-bottom: 2px solid #ffca28; padding-bottom: 10px; }}
+            .tf-stats {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }}
+            .stat-card {{ background: #0d1117; padding: 15px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }}
             .insight-box {{ white-space: pre-wrap; background: #0d1117; padding: 20px; border-radius: 8px; border-left: 5px solid #ffca28; margin-top: 20px; }}
-            .chart-box {{ height: 600px; margin-top: 20px; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; }}
+            .chart-controls {{ margin: 20px 0 10px 0; text-align: right; }}
+            .btn {{ background: #30363d; color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; margin-left: 5px; font-weight: bold; }}
+            .btn:hover {{ background: #ffca28; color: black; }}
+            .chart-box {{ height: 600px; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; }}
             a {{ color: #58a6ff; text-decoration: none; }}
         </style>
     </head>
     <body>
         <div class="container">
             <a href="index.html">← Zurück zum Dashboard</a>
-            <h1>👑 KING VOLKAN ANALYZER | {symbol}/USD</h1>
-            <p><strong>Macro-Trend: {d['b1d']}</strong> | Live-Preis: {d['p']}$</p>
+            <h1>👑 KING VOLKAN TERMINAL | {symbol}/USD</h1>
+            
+            <div class="tf-stats">
+                <div class="stat-card"><strong>1H</strong><br>{d['mtf']['1h']['trend']}<br>RSI: {d['mtf']['1h']['rsi']}</div>
+                <div class="stat-card"><strong>4H</strong><br>{d['mtf']['4h']['trend']}<br>RSI: {d['mtf']['4h']['rsi']}</div>
+                <div class="stat-card"><strong>1D</strong><br>{d['mtf']['1d']['trend']}<br>RSI: {d['mtf']['1d']['rsi']}</div>
+            </div>
+
+            <p><strong>Aktueller Preis: {d['p']:,} $</strong></p>
             <div class="insight-box">{d['full_insight']}</div>
+
+            <div class="chart-controls">
+                <button class="btn" onclick="changeChart('60')">1H Chart</button>
+                <button class="btn" onclick="changeChart('240')">4H Chart</button>
+                <button class="btn" onclick="changeChart('D')">1D Chart</button>
+            </div>
+            
             <div class="chart-box" id="tv-chart"></div>
         </div>
+
         <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
         <script type="text/javascript">
-            new TradingView.widget({{
-                "autosize": true, "symbol": "BINANCE:{symbol}USDT", "interval": "240", "theme": "dark", "style": "1", "locale": "de", "container_id": "tv-chart"
-            }});
+            let currentSymbol = "BINANCE:{symbol}USDT";
+            function renderChart(interval) {{
+                new TradingView.widget({{
+                    "autosize": true, "symbol": currentSymbol, "interval": interval,
+                    "timezone": "Europe/Berlin", "theme": "dark", "style": "1",
+                    "locale": "de", "container_id": "tv-chart"
+                }});
+            }}
+            function changeChart(tf) {{ renderChart(tf); }}
+            renderChart('240');
         </script>
-    </body>
-    </html>
+    </body></html>
     """
     with open(f"{symbol.lower()}.html", "w", encoding="utf-8") as f: f.write(html_template)
 
@@ -112,33 +181,34 @@ def send_embed(symbol, d, web_url):
     embed = Embed(title=f"👑 KING VOLKAN ANALYZER: {symbol}", color=color, url=web_url)
     
     embed.add_field(name="💵 Preis", value=f"**{d['p']:,} $**", inline=True)
-    embed.add_field(name="📉 RSI", value=f"{d['rsi']:.1f}", inline=True)
-    embed.add_field(name="🚦 Trend", value=f"{d['b1d']}", inline=True)
+    embed.add_field(name="📉 RSI (4H)", value=f"{d['rsi']:.1f}", inline=True)
+    embed.add_field(name="🚦 Macro", value=f"{d['b1d']}", inline=True)
     
     s_text = ", ".join([f"{s}$" for s in d['supp']]) or "Suche..."
     r_text = ", ".join([f"{r}$" for r in d['res']]) or "Suche..."
-    embed.add_field(name="🛡️ Support-Level", value=s_text, inline=True)
-    embed.add_field(name="⚔️ Resistance-Level", value=r_text, inline=True)
+    embed.add_field(name="🛡️ Support", value=s_text, inline=True)
+    embed.add_field(name="⚔️ Resistance", value=r_text, inline=True)
     
     embed.add_field(name="🧠 Volkan's Quick-Insight", value=f"*{d['short_insight']}*", inline=False)
-    embed.add_field(name="📊 Deep-Dive Report", value=f"[Klicke hier für interaktive Analyse]({web_url})", inline=False)
+    embed.add_field(name="📊 Deep-Dive & MTF-Terminal", value=f"[Klicke hier für das 1H/4H/1D Terminal]({web_url})", inline=False)
     
     webhook.send(embed=embed, username="KING VOLKAN ANALYZER")
 
 def generate_index_page(coins):
-    links = "".join([f'<li><a href="{s.lower()}.html">{s} Analyse</a></li>' for s in coins])
+    links = "".join([f'<li><a href="{s.lower()}.html" style="color:#ffca28; font-size:20px; text-decoration:none;">{s} Terminal</a></li>' for s in coins])
     html = f"""
-    <html><body style='background:#0d1117;color:white;text-align:center;font-family:sans-serif;'>
-    <h1>👑 KING VOLKAN TERMINAL</h1><ul>{links}</ul></body></html>
+    <html><body style='background:#0d1117;color:white;text-align:center;font-family:sans-serif; padding-top:50px;'>
+    <h1 style="color:#ffca28; font-size:40px;">👑 KING VOLKAN TERMINAL</h1>
+    <ul style="list-style:none; padding:0;">{links}</ul></body></html>
     """
     with open("index.html", "w", encoding="utf-8") as f: f.write(html)
 
 if __name__ == "__main__":
     GITHUB_USER = "phoenix9777" 
     REPO_NAME = "my-sentinel-journal"
-    COINS = ["BTC", "SOL", "SUI", "FET", "INJ"]
+    COINS = ["BTC", "SOL", "SUI", "ETH"]
     
-    generate_index_page(COINS) # Erzeugt Dashboard gegen 404 Fehler
+    generate_index_page(COINS)
 
     for s in COINS:
         data = analyze_coin(s)
