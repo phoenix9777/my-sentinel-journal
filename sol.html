@@ -2,60 +2,79 @@
     <!DOCTYPE html>
     <html lang="de">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>KING VOLKAN ANALYZER - SOL</title>
+        <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>KING VOLKAN TERMINAL - SOL</title>
         <style>
-            body { background: #0d1117; color: #c9d1d9; font-family: sans-serif; padding: 15px; line-height: 1.6; }
-            .container { max-width: 900px; margin: auto; background: #161b22; padding: 25px; border-radius: 12px; border: 1px solid #30363d; }
+            body { background: #0d1117; color: #c9d1d9; font-family: sans-serif; padding: 15px; }
+            .container { max-width: 1000px; margin: auto; background: #161b22; padding: 25px; border-radius: 12px; border: 1px solid #30363d; }
             h1 { color: #ffca28; border-bottom: 2px solid #ffca28; padding-bottom: 10px; }
+            .tf-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
+            .stat-card { background: #0d1117; padding: 15px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }
             .insight-box { white-space: pre-wrap; background: #0d1117; padding: 20px; border-radius: 8px; border-left: 5px solid #ffca28; margin-top: 20px; }
-            .chart-box { height: 600px; margin-top: 20px; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; }
+            .chart-controls { margin: 20px 0 10px 0; text-align: right; }
+            .btn { background: #30363d; color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; margin-left: 5px; font-weight: bold; }
+            .btn:hover { background: #ffca28; color: black; }
+            .chart-box { height: 600px; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; }
             a { color: #58a6ff; text-decoration: none; }
         </style>
     </head>
     <body>
         <div class="container">
             <a href="index.html">← Zurück zum Dashboard</a>
-            <h1>👑 KING VOLKAN ANALYZER | SOL/USD</h1>
-            <p><strong>Macro-Trend: Bearish (Macro Trend) 🔴</strong> | Live-Preis: 80.14$</p>
-            <div class="insight-box">🔎 **Allgemeine Einschätzung**:
-Der aktuelle Preis von SOL/USD liegt bei 80,14$, innerhalb eines 24-Stunden-Ranges von 78,86$ bis 80,89$. Die Mitte dieses Ranges, auch bekannt als Mid, liegt bei 79,88$. Der Relative Strength Index (RSI) zeigt einen Wert von 43,5 an, was auf eine leicht überverkaufte Situation hinweist. Der Bias ist jedoch weiterhin bearish, was auf den makroökonomischen Trend hinweist 🔴.
+            <h1>👑 KING VOLKAN TERMINAL | SOL/USD</h1>
+            
+            <div class="tf-stats">
+                <div class="stat-card"><strong>1H</strong><br>Bullish (Short-Term) 🟢<br>RSI: 54.1</div>
+                <div class="stat-card"><strong>4H</strong><br>Bearish (Short-Term) 🔴<br>RSI: 44.3</div>
+                <div class="stat-card"><strong>1D</strong><br>Bearish 🔴<br>RSI: 39.9</div>
+            </div>
 
-Die Analyse des Moving Average Convergence Divergence (MACD) zeigt, dass die Linien noch nicht gekreuzt sind, was auf eine Fortsetzung des aktuellen Trends hinweist. Der Average True Range (ATR) liegt bei 2,51, was auf eine moderate Volatilität hinweist.
+            <p><strong>Aktueller Preis: 80.25 $</strong></p>
+            <div class="insight-box">🔎 **Allgemeine Einschätzung:**
+Der aktuelle Preis von SOL/USD liegt bei 80,25 $, innerhalb eines 24-Stunden-Preisbereichs von 78,86 $ bis 80,89 $, mit einem Mittelwert von 79,88 $. Die Relative Stärke (RSI) beträgt 44,3, was auf einen leicht bearischen Trend hinweist 🔴. Bei der Analyse des Multi-Timeframe-Status sehen wir, dass der 1-Stunden-Chart bullish (Short-Term) 🟢 ist, mit einem RSI-Wert von 54,1, während der 4-Stunden-Chart und der 1-Tages-Chart beide bearish sind, mit RSI-Werten von 44,3 bzw. 39,9 🔴.
 
-Die Kombination aus RSI, MACD und ATR deutet darauf hin, dass der Markt in einer konsolidierenden Phase ist, bevor ein neuer Trend entsteht. Es ist jedoch wichtig zu beachten, dass der makroökonomische Trend weiterhin bearish ist, was die Wahrscheinlichkeit einer Abwärtsbewegung erhöht 🔴.
+Diese Diskrepanz zwischen den verschiedenen Zeiträumen deutet darauf hin, dass der Markt in einer Phase der Konsolidierung ist, in der die Bullen und Bären um die Vorherrschaft kämpfen. Der RSI-Wert von 44,3 im 4-Stunden-Chart und der 1-Tages-Chart weist auf eine Überverkaufte Situation hin, was zu einem möglichen Rücklauf nach oben führen könnte. Allerdings muss man auch die Gesamttendenz des Marktes berücksichtigen, die derzeit eher bearish ist.
 
-📈 **Wichtige Preislevels**:
-- **Support**: 78,50$, 76,20$ und 74,50$
-- **Resistance**: 80,89$, 82,50$ und 84,20$
-- **FVG-Zonen** (Fair Value Gap): 79,20$ - 79,50$ und 81,50$ - 81,80$
-- **Liquiditäts-Pools**: 77,50$ - 78,00$ und 82,00$ - 82,50$
+📈 **Wichtige Preislevels:**
+- **Unterstützung (Support):** 78,86 $, 76,50 $ und 74,20 $
+- **Widerstand (Resistance):** 80,89 $, 82,50 $ und 84,20 $
+- **Fair Value Gap (FVG)-Zonen:** 77,50 $ - 79,00 $ und 81,50 $ - 83,00 $
 
-Diese Preislevels sind entscheidend für die Bestimmung von Einstiegs- und Ausstiegspunkten sowie für die Festlegung von Stop-Loss- und Take-Profit-Levels.
+Diese Preislevels sind wichtig, da sie als mögliche Umkehrpunkte oder Durchbruchspunkte dienen können. Die Unterstützungen und Widerstände sind auf Basis von historischen Preisschwankungen und Volumen berechnet, während die FVG-Zonen auf Basis von Lücken im Preisverlauf identifiziert werden.
 
-💡 **Trade-Idee & Setup**:
-- **Long-Szenario**: Ein Long-Trade könnte in Betracht gezogen werden, wenn der Preis über 80,89$ steigt und die RSI über 50 ansteigt, was auf eine mögliche Trendwende hinweist. Ein weiterer Faktor, der den Long-Trade unterstützen könnte, ist eine Rückkehr in die FVG-Zone bei 79,20$ - 79,50$, gefolgt von einem Ausbruch über 80,89$.
-- **Short-Szenario**: Ein Short-Trade könnte in Betracht gezogen werden, wenn der Preis unter 78,86$ fällt und die RSI unter 40 fällt, was auf eine Fortsetzung des Abwärtstrends hinweist. Ein weiterer Faktor, der den Short-Trade unterstützen könnte, ist ein Ausbruch unter die Unterstützung bei 78,50$, gefolgt von einer Rückkehr in die Liquiditäts-Pools bei 77,50$ - 78,00$.
+💡 **Trade-Idee & Setup:**
+Ein möglicher Trade-Ansatz könnte darin bestehen, auf einen Rücklauf nach oben zu spekulieren, falls der Preis unter 78,86 $ fällt, um die Überverkaufte Situation auszunutzen. Alternativ könnte man auf einen Durchbruch über 80,89 $ setzen, um den bullischen Impuls zu nutzen. Es ist wichtig, Manipulationen oder Sweep-Orders unter 78,86 $ oder über 80,89 $ zu berücksichtigen, da diese zu schnellen Preisbewegungen führen können.
 
-📚 **Beispiel für einen Einstieg**:
-- **Szenario 1 (Long)**: Der Preis steigt über 80,89$ und die RSI über 50. Als Bestätigungsmuster könnte ein höherer Tiefpunkt im 4-Stunden-Chart dienen. Der Einstieg könnte bei 81,20$ erfolgen, mit einem Stop-Loss bei 79,50$ und einem Take-Profit bei 84,20$.
-- **Szenario 2 (Short)**: Der Preis fällt unter 78,86$ und die RSI unter 40. Als Bestätigungsmuster könnte ein niedrigerer Höchstpunkt im 4-Stunden-Chart dienen. Der Einstieg könnte bei 78,20$ erfolgen, mit einem Stop-Loss bei 80,50$ und einem Take-Profit bei 74,50$.
+📚 **Beispiel für einen Einstieg:**
+- **Szenario 1 (Long):** Einstieg bei 79,50 $, mit einem Stop-Loss bei 78,50 $ und einem Take-Profit bei 82,00 $. Dieses Szenario setzt auf einen Rücklauf nach oben, nachdem der Preis die Unterstützung bei 78,86 $ getestet hat.
+- **Szenario 2 (Short):** Einstieg bei 81,50 $, mit einem Stop-Loss bei 82,50 $ und einem Take-Profit bei 79,00 $. Dieses Szenario spekuliert auf einen Rücklauf nach unten, nachdem der Preis die Widerstandslinie bei 80,89 $ durchbrochen hat.
 
-🌌 **Meine Erwartung (King Volkan AI)**:
-Basierend auf den aktuellen Marktbedingungen und den technischen Indikatoren erwarte ich, dass der Preis von SOL/USD in den nächsten Tagen weiterhin volatil bleibt. Der makroökonomische Trend ist weiterhin bearish, was die Wahrscheinlichkeit einer Abwärtsbewegung erhöht 🔴. Es ist jedoch wichtig, die Marktbedingungen ständig zu überwachen und Anpassungen an die Trading-Strategie vorzunehmen, falls sich die Marktbedingungen ändern.
+Es ist wichtig, dass Trader ihre eigenen Risikomanagement-Strategien anwenden und Positionen entsprechend ihrem Risikoprofil anpassen.
 
-Die Risiken in diesem Markt sind hoch, und es ist wichtig, eine solide Risikomanagement-Strategie zu haben, um Verluste zu minimieren. Es ist auch ratsam, nur mit Geld zu traden, das man sich leisten kann zu verlieren 🤑.
+🌌 **Meine Erwartung (King Volkan AI):**
+Meine persönliche Prognose ist, dass SOL/USD in den nächsten Tagen eine Konsolidierungsphase durchlaufen wird, bevor es zu einer größeren Bewegung kommt. Die technischen Indikatoren deuten auf eine Überverkaufte Situation hin, was zu einem Rücklauf nach oben führen könnte. Allerdings muss man auch die Gesamttendenz des Marktes und mögliche externen Faktoren berücksichtigen, die den Kurs beeinflussen könnten. Es ist wichtig, flexibel zu bleiben und die Marktbedingungen ständig zu überwachen, um Anpassungen an die Trading-Strategie vorzunehmen. 🔜</div>
 
-Insgesamt bietet der SOL/USD-Markt interessante Trading-Möglichkeiten, jedoch ist es entscheidend, die Marktbedingungen sorgfältig zu analysieren und eine disziplinierte Trading-Strategie zu verfolgen 💡.</div>
+            <div class="chart-controls">
+                <button class="btn" onclick="changeChart('60')">1H Chart</button>
+                <button class="btn" onclick="changeChart('240')">4H Chart</button>
+                <button class="btn" onclick="changeChart('D')">1D Chart</button>
+            </div>
+            
             <div class="chart-box" id="tv-chart"></div>
         </div>
+
         <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
         <script type="text/javascript">
-            new TradingView.widget({
-                "autosize": true, "symbol": "BINANCE:SOLUSDT", "interval": "240", "theme": "dark", "style": "1", "locale": "de", "container_id": "tv-chart"
-            });
+            let currentSymbol = "BINANCE:SOLUSDT";
+            function renderChart(interval) {
+                new TradingView.widget({
+                    "autosize": true, "symbol": currentSymbol, "interval": interval,
+                    "timezone": "Europe/Berlin", "theme": "dark", "style": "1",
+                    "locale": "de", "container_id": "tv-chart"
+                });
+            }
+            function changeChart(tf) { renderChart(tf); }
+            renderChart('240');
         </script>
-    </body>
-    </html>
+    </body></html>
     
