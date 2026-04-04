@@ -50,7 +50,7 @@ def analyze_coin(symbol):
     tfs = {"1h": ("hour", 100), "4h": ("hour", 400), "1d": ("day", 250)}
     mtf_results = {}
     
-   for label, (api_tf, limit) in tfs.items():
+    for label, (api_tf, limit) in tfs.items():
         df = fetch_ohlcv(symbol, limit, api_tf)
         if df is not None and len(df) > 0:
             # Spezielle 4h-Aggregierung für CryptoCompare
